@@ -1,19 +1,24 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+import {randomUUID} from "crypto";
+import {onCall, HttpsError} from "firebase-functions/v2/https";
+import {getDalle} from "./openai";
+import { uploadImage }  from "./upload";
 
-import {onRequest} from "firebase-functions/v2/https";
-import * as logger from "firebase-functions/logger";
+exports.getImage = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError(
+      "failed-precondition",
+      "The function must be called while authenticated."
+    );
+  }
+  const prompt = request.data;
+  const blob = await getDalle(prompt);
+  if (blob) {
+    const url = await uploadImage(blob, randomUUID());
+    return url;
+  }
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
-
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+  throw new HttpsError(
+    "aborted",
+    "Couldn't get image."
+  );
+});

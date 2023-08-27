@@ -27,3 +27,5 @@ functions/.runtimeconfig.json
 src/firebase/creds.ts
 functions/admin-credentials.json
 *.log
+functions/.env
+functions/.env.default

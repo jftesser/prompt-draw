@@ -29,3 +29,4 @@ functions/admin-credentials.json
 *.log
 functions/.env
 functions/.env.default
+.firebase/hosting.YnVpbGQ.cache

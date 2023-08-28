@@ -16,10 +16,10 @@ const firebaseApp = initializeApp(firebaseConfig);
 
 export const auth = getAuth(firebaseApp);
 export const functions = getFunctions(firebaseApp);
-//connectFunctionsEmulator(functions, "localhost", 5001);
+connectFunctionsEmulator(functions, "localhost", 5001);
 
 export const getImage = httpsCallable(functions, "getImage");
-export const getChat = httpsCallable(functions, 'getChat');
+export const getChat = httpsCallable(functions, "getChat");
 
 export const signIn = (email: string, password: string) => {
   return signInWithEmailAndPassword(auth, email, password)
@@ -39,22 +39,4 @@ export const database = getDatabase(firebaseApp);
 
 export const signOut = async () => {
   await firebaseSignOut(auth);
-};
-
-export type ProtectedRouteProps = {
-  isAuthenticated: boolean;
-  redirect: JSX.Element;
-  outlet: JSX.Element;
-};
-
-export const ProtectedRoute = ({
-  isAuthenticated,
-  redirect,
-  outlet,
-}: ProtectedRouteProps) => {
-  if (isAuthenticated) {
-    return outlet;
-  } else {
-    return redirect;
-  }
 };

@@ -8,7 +8,7 @@ import joinGame from "./joinGame";
 const Content: FC = () => {
   const navigate = useNavigate();
   const [working, setWorking] = useState(false);
-  const [gameCode, setGameCode] = useState("");
+  const [gameId, setGameId] = useState("");
   const onMakeGame = useCallback(() => {
     setWorking(true);
     (async () => {
@@ -38,16 +38,15 @@ const Content: FC = () => {
             throw new Error("Not logged in");
           }
 
-          await joinGame(gameCode, auth.currentUser.uid);
+          await joinGame(gameId, auth.currentUser.uid);
 
-          navigate(`/play/${gameCode}`);
+          navigate(`/play/${gameId}`);
         } catch (e) {
-          console.warn("joinGame error:", e);
           setWorking(false);
         }
       })();
     },
-    [gameCode, navigate]
+    [gameId, navigate]
   );
   return working ? (
     <></>
@@ -60,8 +59,8 @@ const Content: FC = () => {
         <input
           type="text"
           placeholder="game code"
-          value={gameCode}
-          onChange={(e) => setGameCode(e.target.value)}
+          value={gameId}
+          onChange={(e) => setGameId(e.target.value)}
           required
         />
         <button type="submit">Join Game</button>

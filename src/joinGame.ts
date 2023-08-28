@@ -15,7 +15,7 @@ const joinGame = async (gameId: string, uid: string): Promise<void> => {
 
   // Check if we are already in game
   const gameRef = await get(
-    query(ref(database, `players/${gameId}`), orderByChild("uid"))
+    query(ref(database, `players/${gameId}`), orderByChild("uid"), equalTo(uid))
   );
   if (gameRef.exists()) {
     return;

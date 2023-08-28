@@ -16,10 +16,10 @@ const firebaseApp = initializeApp(firebaseConfig);
 
 export const auth = getAuth(firebaseApp);
 export const functions = getFunctions(firebaseApp);
-connectFunctionsEmulator(functions, "localhost", 5001);
+//connectFunctionsEmulator(functions, "localhost", 5001);
 
 export const getImage = httpsCallable(functions, "getImage");
-export const getVariant = httpsCallable(functions, "getVariant");
+export const getChat = httpsCallable(functions, 'getChat');
 
 export const signIn = (email: string, password: string) => {
   return signInWithEmailAndPassword(auth, email, password)

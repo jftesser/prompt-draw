@@ -1,6 +1,6 @@
 import {randomUUID} from "crypto";
 import {onCall, HttpsError} from "firebase-functions/v2/https";
-import {getDalle} from "./openai";
+import {getDalle, getChat} from "./openai";
 import { uploadImage }  from "./upload";
 
 exports.getImage = onCall(async (request) => {
@@ -25,3 +25,16 @@ exports.getImage = onCall(async (request) => {
   return urls;
 
 });
+
+exports.getChat = onCall(async (request) => {
+    if (!request.auth) {
+      // Throwing an HttpsError so that the client gets the error details.
+      throw new HttpsError(
+        "failed-precondition",
+        "The function must be called while authenticated."
+      );
+    }
+    const data = request.data;
+    const resp = await getChat(data.messages, data.temp, data.model, data.functions);
+    return resp;
+  });

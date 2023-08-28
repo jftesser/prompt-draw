@@ -1,6 +1,7 @@
 import "./Game.scss";
 import { FC, FormEvent, useState } from "react";
 import { getImage } from "./firebase/firebaseSetup";
+import Chat from "./Chat";
 
 export const Game: FC = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -44,6 +45,9 @@ export const Game: FC = () => {
         </form>
         {error && <p>{error}</p>}
         {imageUrl && <img src={imageUrl} alt="prompt response" />}
+      </div>
+      <div>
+        <Chat />
       </div>
     </div>
   );

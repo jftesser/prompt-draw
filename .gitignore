@@ -30,3 +30,4 @@ functions/admin-credentials.json
 functions/.env
 functions/.env.default
 .firebase/hosting.YnVpbGQ.cache
+functions/src/admin-credentials.json

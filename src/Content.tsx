@@ -15,7 +15,6 @@ const Content: FC = () => {
       </button>
       <button
         onClick={() => {
-          console.log("GAME");
           navigate("/game");
         }}
       >

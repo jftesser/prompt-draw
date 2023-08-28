@@ -1,9 +1,9 @@
-import "./Game.scss";
+import "./Demo.scss";
 import { FC, FormEvent, useState } from "react";
 import { getImage } from "./firebase/firebaseSetup";
 import Chat from "./Chat";
 
-export const Game: FC = () => {
+export const Demo: FC = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [awaitingImage, setAwaitingImage] = useState(false);
   const [prompt, setPrompt] = useState("");
@@ -53,4 +53,4 @@ export const Game: FC = () => {
   );
 };
 
-export default Game;
+export default Demo;

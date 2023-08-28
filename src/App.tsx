@@ -9,7 +9,8 @@ import LoginPage from './Login';
 import {ProtectedRoute, ProtectedRouteProps } from './firebase/firebaseSetup';
 import Content from './Content';
 import Host from './Host';
-import Game from './Game';
+import Play from './Play';
+import Demo from './Demo';
 import { AuthContext } from './auth/AuthContext';
 
 const App: FC = () => {
@@ -32,7 +33,9 @@ const App: FC = () => {
       <Routes>
         <Route path='/' element={<ProtectedRoute {...defaultProtectedRouteProps} outlet={<Content />} />} />
         <Route path='host/:gameid' element={<ProtectedRoute {...defaultProtectedRouteProps} outlet={<Host/>}/>}/>
-        <Route path='game' element={<ProtectedRoute {...defaultProtectedRouteProps} outlet={<Game/>}/>}/>
+        <Route path='play/:gameid' element={<ProtectedRoute {...defaultProtectedRouteProps} outlet={<Play/>}/>}/>
+        <Route path='demo' element={<ProtectedRoute {...defaultProtectedRouteProps} outlet={<Demo/>}/>}/>
+
         <Route path='login' element={<LoginPage onLogin={onLogin} />}></Route>
       </Routes>
     </div>

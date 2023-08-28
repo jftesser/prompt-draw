@@ -14,9 +14,9 @@ const Content: FC = () => {
         try {
             // go get the image
             console.log('prompt', prompt);
-            const url = (await getImage(prompt)).data as string;
-            console.log('url', url);
-            setImageUrl(url);
+            const urls = (await getImage({prompt, count: 1})).data as string;
+            console.log('urls', urls);
+            setImageUrl(urls[0]);
             setAwaitingImage(false);
         } catch (error) {
             console.error('handlePrompt error:', error);

@@ -10,15 +10,18 @@ exports.getImage = onCall(async (request) => {
       "The function must be called while authenticated."
     );
   }
-  const prompt = request.data;
-  const blob = await getDalle(prompt);
-  if (blob) {
+  const data = request.data;
+  const blobs = await getDalle(data.prompt, data.count);
+
+  const promises = blobs.map(async (blob) => {
+    if (blob) {
     const url = await uploadImage(blob, randomUUID());
     return url;
-  }
+    }
+    return '';
+  });
+  
+  const urls = await Promise.all(promises);
+  return urls;
 
-  throw new HttpsError(
-    "aborted",
-    "Couldn't get image."
-  );
 });

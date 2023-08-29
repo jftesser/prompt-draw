@@ -10,7 +10,7 @@ import { AuthProvider } from "./auth/AuthProvider";
 import { ProtectedRoute } from "./ProtectedRoute";
 import LoginPage from "./Login";
 import Content from "./Content";
-import Host, { loader as hostLoader } from "./host";
+import Host from "./host";
 import Play from "./Play";
 import Demo from "./Demo";
 
@@ -29,7 +29,6 @@ const router = createBrowserRouter([
   },
   {
     path: "host/:gameId",
-    loader: hostLoader,
     element: <ProtectedRoute outlet={<Host />} />,
   },
   {

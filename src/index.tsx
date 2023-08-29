@@ -10,8 +10,8 @@ import { AuthProvider } from "./auth/AuthProvider";
 import { ProtectedRoute } from "./ProtectedRoute";
 import LoginPage from "./Login";
 import Content from "./Content";
-import Host from "./host";
-import Play from "./Play";
+import Host from "./host/";
+import Play from "./play/";
 import Demo from "./Demo";
 
 const LoginAndRerouteToRoot = () => {

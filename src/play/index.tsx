@@ -1,15 +1,16 @@
-import { FC, useEffect } from "react";
+import { FC, useContext, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { get, ref } from "firebase/database";
 import { database } from "../firebase/firebaseSetup";
-import useStateFromDatabase from "../game/useStateFromDatabase";
 import Display from "./Display";
+import usePlayerState from "../game/usePlayerState";
+import { AuthContext } from "../auth/AuthContext";
 
 export type RouteArgs = {
   params: Record<string, string | undefined>;
 };
 
-export const Host: FC = () => {
+export const Play: FC = () => {
   const params = useParams();
   const nav = useNavigate();
 
@@ -33,7 +34,9 @@ export const Host: FC = () => {
     };
   }, [params.gameId, nav]);
 
-  const state = useStateFromDatabase(params.gameId);
+  const authContext = useContext(AuthContext);
+
+  const state = usePlayerState(params.gameId, authContext.user?.uid);
 
   if (state === undefined) {
     return <span>Loading...</span>;
@@ -46,4 +49,4 @@ export const Host: FC = () => {
   return <Display state={state.state} />;
 };
 
-export default Host;
+export default Play;

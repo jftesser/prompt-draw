@@ -5,7 +5,7 @@ const bytesToBase64 = (bytes: ArrayBuffer): string => {
   const binString = Array.from(new Uint8Array(bytes), (x) =>
     String.fromCodePoint(x)
   ).join("");
-  return btoa(binString);
+  return btoa(binString).replace("+", "-").replace("/", "_");
 };
 
 const makeNewGame = async (uid: string): Promise<string | null> => {

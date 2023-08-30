@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
-import { Player, State } from "./State";
+import { Metaprompt, Player, State } from "./State";
 import { off, onValue, ref, set } from "firebase/database";
 import { database } from "../firebase/firebaseSetup";
+import * as t from "io-ts";
+import { match } from "fp-ts/Either";
+
+const MetapromptCodec = t.type({
+  metaprompt: t.string,
+  celebrity: t.string,
+});
 
 export type ResolvedState = {
   status: "state";
@@ -18,17 +25,17 @@ type Started = {
   admin: string;
 };
 
-type MetaPrompt = {
-  metaprompt: string;
-};
-
 const playerForUid = (uid: string): Player => {
   // TODO get display name
   return { uid, name: uid };
 };
 
-const moveToMetapromptInternal = async (gameId: string, metaprompt: string) => {
-  await set(ref(database, `metaprompt/${gameId}`), { metaprompt });
+const moveToMetapromptInternal = async (
+  gameId: string,
+  metaprompt: Metaprompt
+) => {
+  console.log("Moving to metaprompt", metaprompt);
+  await set(ref(database, `metaprompt/${gameId}`), metaprompt);
 };
 
 // TODO - error handling
@@ -41,12 +48,12 @@ const useStateFromDatabase = (
   const [started, setStarted] = useState<undefined | Started | string>(
     undefined
   );
-  const [metaprompt, setMetaprompt] = useState<undefined | MetaPrompt | string>(
+  const [metaprompt, setMetaprompt] = useState<undefined | Metaprompt | string>(
     undefined
   );
 
   const moveToMetaprompt = useCallback(
-    async (metaprompt: string) => {
+    async (metaprompt: Metaprompt) => {
       if (gameId === undefined) {
         return;
       }
@@ -102,12 +109,14 @@ const useStateFromDatabase = (
         setMetaprompt(undefined);
         return;
       }
-      const metaprompt = snapshot.child("metaprompt").val();
-      if (typeof metaprompt !== "string") {
-        setMetaprompt("Database error!");
-        return;
-      }
-      setMetaprompt({ metaprompt });
+      match(
+        () => {
+          setMetaprompt("Database error!");
+        },
+        (v: Metaprompt) => {
+          setMetaprompt(v);
+        }
+      )(MetapromptCodec.decode(snapshot.val()));
     });
 
     return () => {
@@ -139,7 +148,7 @@ const useStateFromDatabase = (
         state: {
           ...common,
           stage: "metaprompt",
-          metaprompt: metaprompt.metaprompt,
+          metaprompt,
         },
       };
     }

@@ -16,14 +16,19 @@ export type CommonStartedState = CommonState & {
   admin: string;
 };
 
+export type Metaprompt = {
+  metaprompt: string;
+  celebrity: string;
+};
+
 export type IntroState = CommonStartedState & {
   stage: "intro";
-  moveToMetaprompt: (metaprompt: string) => Promise<void>;
+  moveToMetaprompt: (metaprompt: Metaprompt) => Promise<void>;
 };
 
 export type MetapromptState = CommonStartedState & {
   stage: "metaprompt";
-  metaprompt: string;
+  metaprompt: Metaprompt;
 };
 
 export type State = LobbyState | IntroState | MetapromptState;

@@ -1,4 +1,4 @@
-import { Player } from "./State";
+import { Metaprompt, Player } from "./State";
 
 export type CommonState = {
   otherPlayers: Player[];
@@ -20,7 +20,7 @@ export type IntroState = CommonState & {
 
 export type MetapromptState = CommonState & {
   stage: "metaprompt";
-  metaprompt: string;
+  metaprompt: Metaprompt;
 };
 
 export type PlayerState = LobbyState | IntroState | MetapromptState;

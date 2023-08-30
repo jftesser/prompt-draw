@@ -18,11 +18,12 @@ export type CommonStartedState = CommonState & {
 
 export type IntroState = CommonStartedState & {
   stage: "intro";
+  moveToMetaprompt: (metaprompt: string) => Promise<void>;
 };
 
-export type MetaPrompt = CommonStartedState & {
+export type MetapromptState = CommonStartedState & {
   stage: "metaprompt";
   metaprompt: string;
 };
 
-export type State = LobbyState | IntroState | MetaPrompt;
+export type State = LobbyState | IntroState | MetapromptState;

@@ -2,9 +2,16 @@ import { ref, set } from "firebase/database";
 import {
   LobbyState as LobbyPlayerState,
   IntroState as IntroPlayerState,
+  MetapromptState as MetapromptPlayerState,
   PlayerState,
 } from "./PlayerState";
-import { LobbyState, IntroState, Player, State } from "./State";
+import {
+  LobbyState,
+  IntroState,
+  Player,
+  State,
+  MetapromptState,
+} from "./State";
 import useStateFromDatabase from "./useStateFromDatabase";
 import { database } from "../firebase/firebaseSetup";
 import { unreachable } from "../utils";
@@ -17,6 +24,11 @@ type ResolvedLobbyState = {
 type ResolvedIntroState = {
   status: "state";
   state: IntroPlayerState;
+};
+
+type ResolvedMetapromptState = {
+  status: "state";
+  state: MetapromptPlayerState;
 };
 
 export type ResolvedState = {
@@ -92,6 +104,25 @@ const playerIntroFromIntro = (
   };
 };
 
+const playerMetapromptFromMetaprompt = (
+  state: MetapromptState,
+  uid: string
+): ResolvedMetapromptState | PlayerError => {
+  const otherPlayers = getOtherPlayers(state.players, uid);
+  if (otherPlayers === undefined) {
+    return { status: "error", error: "Player not found" };
+  }
+  return {
+    status: "state",
+    state: {
+      stage: "metaprompt",
+      otherPlayers,
+      gameId: state.gameId,
+      metaprompt: state.metaprompt,
+    },
+  };
+};
+
 export const playerStateFromGameState = (
   state: State,
   uid: string
@@ -103,8 +134,7 @@ export const playerStateFromGameState = (
     return playerIntroFromIntro(state, uid);
   }
   if (state.stage === "metaprompt") {
-    // TODO: implement player metaprompt stage
-    return playerIntroFromIntro({ ...state, stage: "intro" }, uid);
+    return playerMetapromptFromMetaprompt(state, uid);
   }
 
   return unreachable(state);

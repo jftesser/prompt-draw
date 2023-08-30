@@ -1,6 +1,7 @@
 import { Player } from "./State";
 
 export type CommonState = {
+  otherPlayers: Player[];
   gameId: string;
 };
 
@@ -10,13 +11,16 @@ export type LobbyControls = {
 
 export type LobbyState = CommonState & {
   stage: "lobby";
-  otherPlayers: Player[];
   controls?: LobbyControls;
 };
 
 export type IntroState = CommonState & {
   stage: "intro";
-  otherPlayers: Player[];
 };
 
-export type PlayerState = LobbyState | IntroState;
+export type MetapromptState = CommonState & {
+  stage: "metaprompt";
+  metaprompt: string;
+};
+
+export type PlayerState = LobbyState | IntroState | MetapromptState;

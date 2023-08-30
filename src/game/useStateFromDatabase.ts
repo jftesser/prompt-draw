@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Player, State } from "./State";
-import { off, onValue, ref } from "firebase/database";
+import { off, onValue, ref, set } from "firebase/database";
 import { database } from "../firebase/firebaseSetup";
 
 export type ResolvedState = {
@@ -25,6 +25,10 @@ type MetaPrompt = {
 const playerForUid = (uid: string): Player => {
   // TODO get display name
   return { uid, name: uid };
+};
+
+const moveToMetaprompt = async (gameId: string, metaprompt: string) => {
+  await set(ref(database, `metaprompt/${gameId}}`), metaprompt);
 };
 
 // TODO - error handling
@@ -116,6 +120,9 @@ const useStateFromDatabase = (
       status: "state",
       state: {
         stage: "intro",
+        moveToMetaprompt: async (metaprompt: string) => {
+          await moveToMetaprompt(gameId, metaprompt);
+        },
         ...common,
       },
     };

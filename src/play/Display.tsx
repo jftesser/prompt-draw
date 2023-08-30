@@ -4,6 +4,7 @@ import { PlayerState } from "../game/PlayerState";
 import { FC } from "react";
 import Lobby from "./Lobby";
 import Intro from "./Intro";
+import Metaprompt from "./Metaprompt";
 import { unreachable } from "../utils";
 
 const Display: FC<{ state: PlayerState }> = ({ state }) => {
@@ -12,6 +13,9 @@ const Display: FC<{ state: PlayerState }> = ({ state }) => {
   }
   if (state.stage === "intro") {
     return <Intro state={state} />;
+  }
+  if (state.stage === "metaprompt") {
+    return <Metaprompt state={state} />;
   }
   return unreachable(state);
 };

@@ -5,7 +5,7 @@ import { FC } from "react";
 import Lobby from "./Lobby";
 import Intro from "./Intro";
 import Metaprompt from "./Metaprompt";
-import { unreachable } from "../utils";
+import { unreachable } from "../Utils";
 
 const Display: FC<{ state: PlayerState }> = ({ state }) => {
   if (state.stage === "lobby") {

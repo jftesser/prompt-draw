@@ -14,7 +14,7 @@ import {
 } from "./State";
 import useStateFromDatabase from "./useStateFromDatabase";
 import { database } from "../firebase/firebaseSetup";
-import { unreachable } from "../utils";
+import { unreachable } from "../Utils";
 
 type ResolvedLobbyState = {
   status: "state";

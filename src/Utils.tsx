@@ -1,25 +1,52 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-const ScrollToTop = () => {
-  const { pathname, hash, key } = useLocation();
+export const ScrollToTop = () => {
+    const { pathname, hash, key } = useLocation();
 
-  useEffect(() => {
-    if (hash === '') {
-      window.scrollTo(0, 0);
-    }
-    else {
-      setTimeout(() => {
-        const id = decodeURIComponent(hash.replace('#', ''));
-        const element = document.getElementById(id);
-        if (element) {
-          element.scrollIntoView();
+    useEffect(() => {
+        if (hash === '') {
+            window.scrollTo(0, 0);
         }
-      }, 0);
-    }
-  }, [pathname, hash, key]);
+        else {
+            setTimeout(() => {
+                const id = decodeURIComponent(hash.replace('#', ''));
+                const element = document.getElementById(id);
+                if (element) {
+                    element.scrollIntoView();
+                }
+            }, 0);
+        }
+    }, [pathname, hash, key]);
 
-  return null;
+    return null;
 };
 
-export { ScrollToTop }
+export const extractJSON = (str: string) => {
+    let firstOpen, firstClose, candidate;
+    firstOpen = 0;
+    firstOpen = str.indexOf('{', firstOpen + 1);
+    do {
+        firstClose = str.lastIndexOf('}');
+        console.log('firstOpen: ' + firstOpen, 'firstClose: ' + firstClose);
+        if (firstClose <= firstOpen) {
+            return null;
+        }
+        do {
+            candidate = str.substring(firstOpen, firstClose + 1);
+            console.log('candidate: ' + candidate);
+            try {
+                const res = JSON.parse(candidate);
+                console.log('...found');
+                return res;
+            }
+            catch (e) {
+                console.log('...failed');
+            }
+            firstClose = str.substr(0, firstClose).lastIndexOf('}');
+        } while (firstClose > firstOpen);
+        firstOpen = str.indexOf('{', firstOpen + 1);
+    } while (firstOpen !== -1);
+}
+
+export const unreachable = (x: never): any => {};

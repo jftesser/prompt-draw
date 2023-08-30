@@ -1,8 +1,23 @@
 import { ref, set } from "firebase/database";
-import { PlayerState } from "./PlayerState";
-import { State } from "./State";
+import {
+  LobbyState as LobbyPlayerState,
+  IntroState as IntroPlayerState,
+  PlayerState,
+} from "./PlayerState";
+import { LobbyState, IntroState, Player, State } from "./State";
 import useStateFromDatabase from "./useStateFromDatabase";
 import { database } from "../firebase/firebaseSetup";
+import { unreachable } from "../utils";
+
+type ResolvedLobbyState = {
+  status: "state";
+  state: LobbyPlayerState;
+};
+
+type ResolvedIntroState = {
+  status: "state";
+  state: IntroPlayerState;
+};
 
 export type ResolvedState = {
   status: "state";
@@ -14,12 +29,23 @@ export type PlayerError = {
   error: string;
 };
 
-export const playerStateFromGameState = (
-  state: State,
+const getOtherPlayers = (
+  players: Player[],
   uid: string
-): ResolvedState | PlayerError => {
-  const otherPlayers = state.players.filter((player) => player.uid !== uid);
-  if (otherPlayers.length !== state.players.length - 1) {
+): Player[] | undefined => {
+  const otherPlayers = players.filter((player) => player.uid !== uid);
+  if (otherPlayers.length !== players.length - 1) {
+    return undefined;
+  }
+  return otherPlayers;
+};
+
+export const playerLobbyFromLobby = (
+  state: LobbyState,
+  uid: string
+): ResolvedLobbyState | PlayerError => {
+  const otherPlayers = getOtherPlayers(state.players, uid);
+  if (otherPlayers === undefined) {
     return { status: "error", error: "Player not found" };
   }
   if (state.players[0]?.uid === uid) {
@@ -50,6 +76,33 @@ export const playerStateFromGameState = (
       state: { stage: "lobby", otherPlayers, gameId: state.gameId },
     };
   }
+};
+
+const playerIntroFromIntro = (
+  state: IntroState,
+  uid: string
+): ResolvedIntroState | PlayerError => {
+  const otherPlayers = getOtherPlayers(state.players, uid);
+  if (otherPlayers === undefined) {
+    return { status: "error", error: "Player not found" };
+  }
+  return {
+    status: "state",
+    state: { stage: "intro", otherPlayers, gameId: state.gameId },
+  };
+};
+
+export const playerStateFromGameState = (
+  state: State,
+  uid: string
+): ResolvedState | PlayerError => {
+  if (state.stage === "lobby") {
+    return playerLobbyFromLobby(state, uid);
+  }
+  if (state.stage === "intro") {
+    return playerIntroFromIntro(state, uid);
+  }
+  return unreachable(state);
 };
 
 export const usePlayerState = (

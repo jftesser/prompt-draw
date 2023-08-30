@@ -14,4 +14,9 @@ export type LobbyState = CommonState & {
   controls?: LobbyControls;
 };
 
-export type PlayerState = LobbyState;
+export type IntroState = CommonState & {
+  stage: "intro";
+  otherPlayers: Player[];
+};
+
+export type PlayerState = LobbyState | IntroState;

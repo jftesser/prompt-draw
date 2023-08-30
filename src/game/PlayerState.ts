@@ -5,7 +5,7 @@ export type CommonState = {
 };
 
 export type LobbyControls = {
-  startGame?: () => void;
+  startGame?: () => Promise<void>;
 };
 
 export type LobbyState = CommonState & {

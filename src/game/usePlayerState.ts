@@ -1,6 +1,8 @@
+import { ref, set } from "firebase/database";
 import { PlayerState } from "./PlayerState";
 import { State } from "./State";
 import useStateFromDatabase from "./useStateFromDatabase";
+import { database } from "../firebase/firebaseSetup";
 
 export type ResolvedState = {
   status: "state";
@@ -21,13 +23,25 @@ export const playerStateFromGameState = (
     return { status: "error", error: "Player not found" };
   }
   if (state.players[0]?.uid === uid) {
+    const controls = otherPlayers
+      ? {
+          startGame: async (): Promise<void> => {
+            await set(ref(database, `started/${state.gameId}`), {
+              admin: uid,
+              players: Object.fromEntries(
+                state.players.map((player) => [player.uid, true])
+              ),
+            });
+          },
+        }
+      : {};
     return {
       status: "state",
       state: {
         stage: "lobby",
         otherPlayers,
         gameId: state.gameId,
-        controls: {},
+        controls,
       },
     };
   } else {

@@ -35,7 +35,7 @@ const useStateFromDatabase = (
       status: "state",
       state: { stage: "lobby", players: [], gameId },
     });
-    const playersRef = ref(database, `players/${gameId}`);
+    const playersRef = ref(database, `lobby/${gameId}`);
     onValue(playersRef, (snapshot) => {
       const players: Player[] = [];
       snapshot.forEach((child) => {

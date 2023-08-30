@@ -17,9 +17,7 @@ const makeNewGame = async (uid: string): Promise<string | null> => {
       (await crypto.subtle.digest("SHA-256", data)).slice(0, 3)
     );
     try {
-      await set(ref(database, `games/${guess}`), {
-        host: uid,
-      });
+      await set(ref(database, `games/${guess}/host`), uid);
       return guess;
     } catch {}
   }

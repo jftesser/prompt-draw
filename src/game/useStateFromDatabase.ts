@@ -47,9 +47,9 @@ const startGameInternal = async (
   admin: string,
   players: Player[]
 ): Promise<void> => {
-  await set(ref(database, `started/${gameId}`), {
+  await set(ref(database, `games/${gameId}/started`), {
     admin,
-    players: Object.fromEntries(players.map((player) => [player.uid, true])),
+    players: players.map((player) => player.uid),
   });
 };
 
@@ -137,15 +137,11 @@ const useStateFromDatabase = (
       }
       const playersRef = snapshot.child("players");
       const playersVal = playersRef.val();
-      if (typeof playersVal !== "object") {
+      if (!Array.isArray(playersVal)) {
         setStarted("Database error!");
         return;
       }
-      if (Array.isArray(playersVal)) {
-        setStarted("Database error!");
-        return;
-      }
-      const players = Object.keys(playersVal).map((uid) => playerForUid(uid));
+      const players = playersVal.map((uid) => playerForUid(uid));
       setStarted({ admin, players });
     });
 

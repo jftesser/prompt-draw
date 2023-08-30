@@ -1,4 +1,3 @@
-import { ref, set } from "firebase/database";
 import {
   LobbyState as LobbyPlayerState,
   IntroState as IntroPlayerState,

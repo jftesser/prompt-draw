@@ -13,7 +13,6 @@ import {
   MetapromptState,
 } from "./State";
 import useStateFromDatabase from "./useStateFromDatabase";
-import { database } from "../firebase/firebaseSetup";
 import { unreachable } from "../Utils";
 
 type ResolvedLobbyState = {

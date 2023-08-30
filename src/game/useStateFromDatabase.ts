@@ -5,9 +5,19 @@ import { database } from "../firebase/firebaseSetup";
 import * as t from "io-ts";
 import { match } from "fp-ts/Either";
 
+const StartedCodec = t.type({
+  admin: t.string,
+  players: t.array(t.string),
+});
+
 const MetapromptCodec = t.type({
   metaprompt: t.string,
   celebrity: t.string,
+});
+
+const WinnerCodec = t.type({
+  uid: t.string,
+  message: t.string,
 });
 
 export type ResolvedState = {
@@ -19,6 +29,8 @@ export type DBError = {
   status: "error";
   error: string;
 };
+
+const UIDToStringCodec = t.record(t.string, t.string);
 
 type Started = {
   players: Player[];
@@ -145,25 +157,56 @@ const useStateFromDatabase = (
       setStarted({ admin, players });
     });
 
-    onValue(ref(database, `games/${gameId}/metaprompt`), (snapshot) => {
-      if (!snapshot.exists()) {
-        setMetaprompt(undefined);
-        return;
-      }
-      match(
-        () => {
-          setMetaprompt("Database error!");
+    for (const { path, setter, codec } of [
+      {
+        path: "started",
+        setter: (v: t.TypeOf<typeof StartedCodec> | string | undefined) => {
+          if (typeof v === "object") {
+            const { admin, players } = v;
+            setStarted({
+              admin,
+              players: players.map((uid: string) => playerForUid(uid)),
+            });
+            return;
+          }
+          setStarted(v);
         },
-        (v: Metaprompt) => {
-          setMetaprompt(v);
+        codec: StartedCodec,
+      },
+      { path: "metaprompt", setter: setMetaprompt, codec: MetapromptCodec },
+      { path: "prompts", setter: setPrompts, codec: UIDToStringCodec },
+      { path: "images", setter: setImages, codec: UIDToStringCodec },
+      { path: "judgements", setter: setJudgements, codec: UIDToStringCodec },
+      { path: "winner", setter: setWinner, codec: WinnerCodec },
+    ]) {
+      onValue(ref(database, `games/${gameId}/${path}`), (snapshot) => {
+        if (!snapshot.exists()) {
+          setter(undefined);
+          return;
         }
-      )(MetapromptCodec.decode(snapshot.val()));
-    });
+        match(
+          () => {
+            setter("Database error!");
+          },
+          (v) => {
+            setter(v as any);
+          }
+        )(codec.decode(snapshot.val()));
+      });
+    }
 
     return () => {
-      off(ref(database, `games/${gameId}/lobby`));
-      off(ref(database, `games/${gameId}/started`));
-      off(ref(database, `metaprompt/${gameId}/`));
+      for (const path of [
+        "lobby",
+        "started",
+        "metaprompt",
+        "prompts",
+        "images",
+        "judgements",
+        "winner",
+      ]) {
+        off(ref(database, `games/${gameId}/${path}`));
+      }
       setLobbyPlayers(undefined);
       setStarted(undefined);
       setMetaprompt(undefined);
@@ -203,21 +246,17 @@ const useStateFromDatabase = (
 
   if (started !== undefined) {
     const common = { players: started.players, gameId, admin: started.admin };
-    if (
-      metaprompt !== undefined &&
-      prompts !== undefined &&
-      judgements !== undefined &&
-      images !== undefined
-    ) {
+    console.warn(started, metaprompt, prompts, images, judgements, winner);
+    if (metaprompt !== undefined) {
       return {
         status: "state",
         state: {
           ...common,
           stage: "metaprompt",
-          metaprompt: metaprompt as Metaprompt,
-          prompts,
-          images,
-          judgements,
+          metaprompt: metaprompt,
+          prompts: prompts ?? {},
+          images: images ?? {},
+          judgements: judgements ?? {},
           markCompleted,
           addPrompt: async () => {
             throw new Error("TODO");

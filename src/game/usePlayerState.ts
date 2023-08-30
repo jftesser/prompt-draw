@@ -102,6 +102,11 @@ export const playerStateFromGameState = (
   if (state.stage === "intro") {
     return playerIntroFromIntro(state, uid);
   }
+  if (state.stage === "metaprompt") {
+    // TODO: implement player metaprompt stage
+    return playerIntroFromIntro({ ...state, stage: "intro" }, uid);
+  }
+
   return unreachable(state);
 };
 

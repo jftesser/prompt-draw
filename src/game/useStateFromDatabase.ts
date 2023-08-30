@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import { Player, State } from "./State";
-import {
-  off,
-  onChildAdded,
-  onChildRemoved,
-  onValue,
-  ref,
-} from "firebase/database";
+import { off, onValue, ref } from "firebase/database";
 import { database } from "../firebase/firebaseSetup";
 
 export type ResolvedState = {
@@ -24,6 +18,10 @@ type Started = {
   admin: string;
 };
 
+type MetaPrompt = {
+  metaprompt: string;
+};
+
 const playerForUid = (uid: string): Player => {
   // TODO get display name
   return { uid, name: uid };
@@ -37,6 +35,9 @@ const useStateFromDatabase = (
     undefined | Player[] | string
   >(undefined);
   const [started, setStarted] = useState<undefined | Started | string>(
+    undefined
+  );
+  const [metaprompt, setMetaprompt] = useState<undefined | MetaPrompt | string>(
     undefined
   );
 
@@ -79,7 +80,11 @@ const useStateFromDatabase = (
     });
 
     return () => {
+      off(ref(database, `lobby/${gameId}`));
+      off(ref(database, `started/${gameId}`));
       setLobbyPlayers(undefined);
+      setStarted(undefined);
+      setMetaprompt(undefined);
     };
   }, [gameId]);
 
@@ -90,14 +95,28 @@ const useStateFromDatabase = (
   if (typeof started === "string") {
     return { status: "error", error: started };
   }
+  if (typeof metaprompt === "string") {
+    return { status: "error", error: metaprompt };
+  }
+
   if (started !== undefined) {
+    const common = { players: started.players, gameId, admin: started.admin };
+    if (metaprompt !== undefined) {
+      return {
+        status: "state",
+        state: {
+          ...common,
+          stage: "metaprompt",
+          metaprompt: metaprompt.metaprompt,
+        },
+      };
+    }
+
     return {
       status: "state",
       state: {
         stage: "intro",
-        players: started.players,
-        gameId,
-        admin: started.admin,
+        ...common,
       },
     };
   }

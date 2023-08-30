@@ -20,4 +20,9 @@ export type IntroState = CommonStartedState & {
   stage: "intro";
 };
 
-export type State = LobbyState | IntroState;
+export type MetaPrompt = CommonStartedState & {
+  stage: "metaprompt";
+  metaprompt: string;
+};
+
+export type State = LobbyState | IntroState | MetaPrompt;

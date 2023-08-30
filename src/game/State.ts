@@ -12,4 +12,12 @@ export type LobbyState = CommonState & {
   stage: "lobby";
 };
 
-export type State = LobbyState;
+export type CommonStartedState = CommonState & {
+  admin: string;
+};
+
+export type IntroState = CommonStartedState & {
+  stage: "intro";
+};
+
+export type State = LobbyState | IntroState;

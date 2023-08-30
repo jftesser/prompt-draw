@@ -70,6 +70,10 @@ const useStateFromDatabase = (
     });
 
     onValue(ref(database, `started/${gameId}`), (snapshot) => {
+      if (!snapshot.exists()) {
+        setStarted(undefined);
+        return;
+      }
       const admin = snapshot.child("admin").val();
       if (!admin) {
         setStarted("Database error!");
@@ -94,6 +98,10 @@ const useStateFromDatabase = (
     });
 
     onValue(ref(database, `metaprompt/${gameId}`), (snapshot) => {
+      if (!snapshot.exists()) {
+        setMetaprompt(undefined);
+        return;
+      }
       const metaprompt = snapshot.child("metaprompt").val();
       if (typeof metaprompt !== "string") {
         setMetaprompt("Database error!");

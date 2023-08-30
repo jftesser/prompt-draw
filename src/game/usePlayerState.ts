@@ -63,14 +63,7 @@ export const playerLobbyFromLobby = (
   if (state.players[0]?.uid === uid) {
     const controls = otherPlayers
       ? {
-          startGame: async (): Promise<void> => {
-            await set(ref(database, `started/${state.gameId}`), {
-              admin: uid,
-              players: Object.fromEntries(
-                state.players.map((player) => [player.uid, true])
-              ),
-            });
-          },
+          startGame: state.startGame,
         }
       : {};
     return {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Metaprompt, Player, State } from "./State";
+import { Metaprompt, Player, State, WinnerData } from "./State";
 import { off, onValue, ref, set } from "firebase/database";
 import { database } from "../firebase/firebaseSetup";
 import * as t from "io-ts";
@@ -35,7 +35,22 @@ const moveToMetapromptInternal = async (
   metaprompt: Metaprompt
 ) => {
   console.log("Moving to metaprompt", metaprompt);
-  await set(ref(database, `metaprompt/${gameId}`), metaprompt);
+  await set(ref(database, `games/${gameId}/metaprompt`), metaprompt);
+};
+
+const markCompletedInternal = async (gameId: string) => {
+  await set(ref(database, `games/${gameId}/completed`), true);
+};
+
+const startGameInternal = async (
+  gameId: string,
+  admin: string,
+  players: Player[]
+): Promise<void> => {
+  await set(ref(database, `started/${gameId}`), {
+    admin,
+    players: Object.fromEntries(players.map((player) => [player.uid, true])),
+  });
 };
 
 // TODO - error handling
@@ -51,6 +66,18 @@ const useStateFromDatabase = (
   const [metaprompt, setMetaprompt] = useState<undefined | Metaprompt | string>(
     undefined
   );
+  const [prompts, setPrompts] = useState<
+    undefined | { [uid: string]: string } | string
+  >(undefined);
+  const [images, setImages] = useState<
+    undefined | { [uid: string]: string } | string
+  >(undefined);
+  const [judgements, setJudgements] = useState<
+    undefined | { [uid: string]: string } | string
+  >(undefined);
+  const [winner, setWinner] = useState<undefined | WinnerData | string>(
+    undefined
+  );
 
   const moveToMetaprompt = useCallback(
     async (metaprompt: Metaprompt) => {
@@ -62,12 +89,30 @@ const useStateFromDatabase = (
     [gameId]
   );
 
+  const markCompleted = useCallback(async () => {
+    if (gameId === undefined) {
+      return;
+    }
+    if (typeof winner === "object") {
+      markCompletedInternal(gameId);
+    }
+  }, [gameId, winner]);
+
+  const startGame = useCallback(async () => {
+    if (gameId === undefined) {
+      return;
+    }
+    if (typeof lobbyPlayers !== "object") {
+      return;
+    }
+    await startGameInternal(gameId, lobbyPlayers[0].uid, lobbyPlayers);
+  }, [gameId, lobbyPlayers]);
   useEffect(() => {
     if (!gameId) {
       return;
     }
 
-    onValue(ref(database, `lobby/${gameId}`), (snapshot) => {
+    onValue(ref(database, `games/${gameId}/lobby`), (snapshot) => {
       const players: Player[] = [];
       snapshot.forEach((child) => {
         const uid = child.val().uid;
@@ -76,7 +121,7 @@ const useStateFromDatabase = (
       setLobbyPlayers(players);
     });
 
-    onValue(ref(database, `started/${gameId}`), (snapshot) => {
+    onValue(ref(database, `games/${gameId}/started`), (snapshot) => {
       if (!snapshot.exists()) {
         setStarted(undefined);
         return;
@@ -104,7 +149,7 @@ const useStateFromDatabase = (
       setStarted({ admin, players });
     });
 
-    onValue(ref(database, `metaprompt/${gameId}`), (snapshot) => {
+    onValue(ref(database, `games/${gameId}/metaprompt`), (snapshot) => {
       if (!snapshot.exists()) {
         setMetaprompt(undefined);
         return;
@@ -120,12 +165,16 @@ const useStateFromDatabase = (
     });
 
     return () => {
-      off(ref(database, `lobby/${gameId}`));
-      off(ref(database, `started/${gameId}`));
-      off(ref(database, `metaprompt/${gameId}`));
+      off(ref(database, `games/${gameId}/lobby`));
+      off(ref(database, `games/${gameId}/started`));
+      off(ref(database, `metaprompt/${gameId}/`));
       setLobbyPlayers(undefined);
       setStarted(undefined);
       setMetaprompt(undefined);
+      setPrompts(undefined);
+      setWinner(undefined);
+      setImages(undefined);
+      setJudgements(undefined);
     };
   }, [gameId]);
 
@@ -133,22 +182,59 @@ const useStateFromDatabase = (
     return undefined;
   }
 
+  // We can't simplify this because then typescript won't update the variable types :'(
+  if (typeof lobbyPlayers === "string") {
+    return { status: "error", error: lobbyPlayers };
+  }
   if (typeof started === "string") {
     return { status: "error", error: started };
   }
   if (typeof metaprompt === "string") {
     return { status: "error", error: metaprompt };
   }
+  if (typeof prompts === "string") {
+    return { status: "error", error: prompts };
+  }
+  if (typeof images === "string") {
+    return { status: "error", error: images };
+  }
+  if (typeof judgements === "string") {
+    return { status: "error", error: judgements };
+  }
+  if (typeof winner === "string") {
+    return { status: "error", error: winner };
+  }
 
   if (started !== undefined) {
     const common = { players: started.players, gameId, admin: started.admin };
-    if (metaprompt !== undefined) {
+    if (
+      metaprompt !== undefined &&
+      prompts !== undefined &&
+      judgements !== undefined &&
+      images !== undefined
+    ) {
       return {
         status: "state",
         state: {
           ...common,
           stage: "metaprompt",
-          metaprompt,
+          metaprompt: metaprompt as Metaprompt,
+          prompts,
+          images,
+          judgements,
+          markCompleted,
+          addPrompt: async () => {
+            throw new Error("TODO");
+          },
+          addImage: async () => {
+            throw new Error("TODO");
+          },
+          addJudgement: async () => {
+            throw new Error("TODO");
+          },
+          addWinner: async () => {
+            throw new Error("TODO");
+          },
         },
       };
     }
@@ -163,13 +249,10 @@ const useStateFromDatabase = (
     };
   }
 
-  if (typeof lobbyPlayers === "string") {
-    return { status: "error", error: lobbyPlayers };
-  }
   if (lobbyPlayers !== undefined) {
     return {
       status: "state",
-      state: { stage: "lobby", players: lobbyPlayers, gameId },
+      state: { stage: "lobby", players: lobbyPlayers, gameId, startGame },
     };
   }
   return undefined;

@@ -18,7 +18,7 @@ const makeNewGame = async (uid: string): Promise<string | null> => {
     );
     try {
       await set(ref(database, `games/${guess}`), {
-        uid,
+        host: uid,
       });
       return guess;
     } catch {}

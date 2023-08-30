@@ -10,6 +10,7 @@ export type CommonState = {
 
 export type LobbyState = CommonState & {
   stage: "lobby";
+  startGame: () => Promise<void>;
 };
 
 export type CommonStartedState = CommonState & {
@@ -26,9 +27,27 @@ export type IntroState = CommonStartedState & {
   moveToMetaprompt: (metaprompt: Metaprompt) => Promise<void>;
 };
 
+export type WinnerData = {
+  uid: string;
+  message: string;
+};
+
 export type MetapromptState = CommonStartedState & {
   stage: "metaprompt";
   metaprompt: Metaprompt;
+  prompts: { [uid: string]: string };
+  images: { [uid: string]: string };
+  judgements: { [uid: string]: string };
+  winner?: WinnerData;
+  addPrompt: (prompt: string) => Promise<void>;
+  addImage: (uid: string, url: string) => Promise<void>;
+  addJudgement: (uid: string, judgement: string) => Promise<void>;
+  addWinner: (data: WinnerData) => Promise<void>;
+  markCompleted: () => Promise<void>;
+};
+
+export type CompletedState = CommonStartedState & {
+  winner: string;
 };
 
 export type State = LobbyState | IntroState | MetapromptState;

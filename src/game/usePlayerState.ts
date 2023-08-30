@@ -10,7 +10,7 @@ import {
   IntroState,
   Player,
   State,
-  MetapromptState,
+  MainGameState,
 } from "./State";
 import useStateFromDatabase from "./useStateFromDatabase";
 import { unreachable } from "../Utils";
@@ -97,7 +97,7 @@ const playerIntroFromIntro = (
 };
 
 const playerMetapromptFromMetaprompt = (
-  state: MetapromptState,
+  state: MainGameState,
   uid: string
 ): ResolvedMetapromptState | PlayerError => {
   const otherPlayers = getOtherPlayers(state.players, uid);
@@ -125,7 +125,7 @@ export const playerStateFromGameState = (
   if (state.stage === "intro") {
     return playerIntroFromIntro(state, uid);
   }
-  if (state.stage === "metaprompt") {
+  if (state.stage === "main") {
     return playerMetapromptFromMetaprompt(state, uid);
   }
 

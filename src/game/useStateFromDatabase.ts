@@ -252,23 +252,26 @@ const useStateFromDatabase = (
         status: "state",
         state: {
           ...common,
-          stage: "metaprompt",
+          stage: "main",
           metaprompt: metaprompt,
           prompts: prompts ?? {},
           images: images ?? {},
           judgements: judgements ?? {},
           markCompleted,
-          addPrompt: async () => {
-            throw new Error("TODO");
+          addPrompt: async (uid: string, prompt: string) => {
+            await set(ref(database, `games/${gameId}/prompts/${uid}`), prompt);
           },
-          addImage: async () => {
-            throw new Error("TODO");
+          addImage: async (uid: string, url: string) => {
+            await set(ref(database, `games/${gameId}/images/${uid}`), url);
           },
-          addJudgement: async () => {
-            throw new Error("TODO");
+          addJudgement: async (uid: string, message: string) => {
+            await set(
+              ref(database, `games/${gameId}/judgements/${uid}`),
+              message
+            );
           },
-          addWinner: async () => {
-            throw new Error("TODO");
+          addWinner: async (data: WinnerData) => {
+            await set(ref(database, `games/${gameId}/winner`), data);
           },
         },
       };

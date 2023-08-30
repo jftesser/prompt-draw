@@ -21,6 +21,7 @@ export type IntroState = CommonState & {
 export type MetapromptState = CommonState & {
   stage: "metaprompt";
   metaprompt: Metaprompt;
+  //   addPrompt: (prompt: string) => Promise<void>; TODO
 };
 
 export type PlayerState = LobbyState | IntroState | MetapromptState;

@@ -32,14 +32,14 @@ export type WinnerData = {
   message: string;
 };
 
-export type MetapromptState = CommonStartedState & {
-  stage: "metaprompt";
+export type MainGameState = CommonStartedState & {
+  stage: "main";
   metaprompt: Metaprompt;
   prompts: { [uid: string]: string };
   images: { [uid: string]: string };
   judgements: { [uid: string]: string };
   winner?: WinnerData;
-  addPrompt: (prompt: string) => Promise<void>;
+  addPrompt: (uid: string, prompt: string) => Promise<void>;
   addImage: (uid: string, url: string) => Promise<void>;
   addJudgement: (uid: string, judgement: string) => Promise<void>;
   addWinner: (data: WinnerData) => Promise<void>;
@@ -50,4 +50,4 @@ export type CompletedState = CommonStartedState & {
   winner: string;
 };
 
-export type State = LobbyState | IntroState | MetapromptState;
+export type State = LobbyState | IntroState | MainGameState;

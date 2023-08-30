@@ -15,7 +15,7 @@ export const Demo: FC = () => {
     try {
       // go get the image
       console.log("prompt", prompt);
-      const urls = (await getImage({ prompt, count: 1 })).data as string;
+      const urls = (await getImage({ prompt, count: 1 })).data as string[];
       console.log("urls", urls);
       setImageUrl(urls[0]);
       setAwaitingImage(false);

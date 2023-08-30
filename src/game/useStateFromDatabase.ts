@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Player, State } from "./State";
 import { off, onValue, ref, set } from "firebase/database";
 import { database } from "../firebase/firebaseSetup";
@@ -27,8 +27,8 @@ const playerForUid = (uid: string): Player => {
   return { uid, name: uid };
 };
 
-const moveToMetaprompt = async (gameId: string, metaprompt: string) => {
-  await set(ref(database, `metaprompt/${gameId}}`), metaprompt);
+const moveToMetapromptInternal = async (gameId: string, metaprompt: string) => {
+  await set(ref(database, `metaprompt/${gameId}`), { metaprompt });
 };
 
 // TODO - error handling
@@ -43,6 +43,16 @@ const useStateFromDatabase = (
   );
   const [metaprompt, setMetaprompt] = useState<undefined | MetaPrompt | string>(
     undefined
+  );
+
+  const moveToMetaprompt = useCallback(
+    async (metaprompt: string) => {
+      if (gameId === undefined) {
+        return;
+      }
+      await moveToMetapromptInternal(gameId, metaprompt);
+    },
+    [gameId]
   );
 
   useEffect(() => {
@@ -83,9 +93,19 @@ const useStateFromDatabase = (
       setStarted({ admin, players });
     });
 
+    onValue(ref(database, `metaprompt/${gameId}`), (snapshot) => {
+      const metaprompt = snapshot.child("metaprompt").val();
+      if (typeof metaprompt !== "string") {
+        setMetaprompt("Database error!");
+        return;
+      }
+      setMetaprompt({ metaprompt });
+    });
+
     return () => {
       off(ref(database, `lobby/${gameId}`));
       off(ref(database, `started/${gameId}`));
+      off(ref(database, `metaprompt/${gameId}`));
       setLobbyPlayers(undefined);
       setStarted(undefined);
       setMetaprompt(undefined);
@@ -120,9 +140,7 @@ const useStateFromDatabase = (
       status: "state",
       state: {
         stage: "intro",
-        moveToMetaprompt: async (metaprompt: string) => {
-          await moveToMetaprompt(gameId, metaprompt);
-        },
+        moveToMetaprompt,
         ...common,
       },
     };

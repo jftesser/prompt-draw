@@ -34,20 +34,42 @@ export type WinnerData = {
 
 export type MainGameState = CommonStartedState & {
   stage: "main";
+
+  // Metaprompt to show to players
   metaprompt: Metaprompt;
+
+  // Prompts created by each player.  This will be built "on the fly" - user
+  // prompts will be added when they come in from the players
   prompts: { [uid: string]: string };
+
+  // Images for each user's prompts.  These will be built "on the fly" - user
+  // images will be added when they are created by the host.
   images: { [uid: string]: string };
+
+  // Judgements for each user's prompts
   judgements: { [uid: string]: string };
+
+  // Data about the winner, after that comes in.
   winner?: WinnerData;
+
+  // Called by each player - set their own prompt
   addPrompt: (uid: string, prompt: string) => Promise<void>;
+
+  // Called by the host - set the image for a prompt
   addImage: (uid: string, url: string) => Promise<void>;
+
+  // Called by the host - set the judgement for a prompt
   addJudgement: (uid: string, judgement: string) => Promise<void>;
+
+  // Called by the host - set the winner
   addWinner: (data: WinnerData) => Promise<void>;
+
+  // Called by the host - mark the game as completed
   markCompleted: () => Promise<void>;
 };
 
 export type CompletedState = CommonStartedState & {
-  winner: string;
+  winner: Player;
 };
 
 export type State = LobbyState | IntroState | MainGameState;

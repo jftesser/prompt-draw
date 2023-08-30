@@ -5,6 +5,8 @@ import { database } from "../firebase/firebaseSetup";
 import * as t from "io-ts";
 import { match } from "fp-ts/Either";
 
+const LobbyCodec = t.record(t.string, t.type({ uid: t.string }));
+
 const StartedCodec = t.type({
   admin: t.string,
   players: t.array(t.string),
@@ -46,7 +48,6 @@ const moveToMetapromptInternal = async (
   gameId: string,
   metaprompt: Metaprompt
 ) => {
-  console.log("Moving to metaprompt", metaprompt);
   await set(ref(database, `games/${gameId}/metaprompt`), metaprompt);
 };
 
@@ -64,6 +65,19 @@ const startGameInternal = async (
     players: players.map((player) => player.uid),
   });
 };
+
+const mappedSetter =
+  <T, U extends object>(
+    setter: (setter: T | undefined | string) => void,
+    f: (x: U) => T
+  ): ((x: U | undefined | string) => void) =>
+  (v) => {
+    if (typeof v === "object") {
+      setter(f(v));
+      return;
+    }
+    setter(v);
+  };
 
 // TODO - error handling
 const useStateFromDatabase = (
@@ -88,6 +102,9 @@ const useStateFromDatabase = (
     undefined | { [uid: string]: string } | string
   >(undefined);
   const [winner, setWinner] = useState<undefined | WinnerData | string>(
+    undefined
+  );
+  const [completed, setCompleted] = useState<undefined | boolean | string>(
     undefined
   );
 
@@ -124,53 +141,25 @@ const useStateFromDatabase = (
       return;
     }
 
-    onValue(ref(database, `games/${gameId}/lobby`), (snapshot) => {
-      const players: Player[] = [];
-      snapshot.forEach((child) => {
-        const uid = child.val().uid;
-        players.push(playerForUid(uid));
-      });
-      setLobbyPlayers(players);
-    });
-
-    onValue(ref(database, `games/${gameId}/started`), (snapshot) => {
-      if (!snapshot.exists()) {
-        setStarted(undefined);
-        return;
-      }
-      const admin = snapshot.child("admin").val();
-      if (!admin) {
-        setStarted("Database error!");
-        return;
-      }
-      if (typeof admin !== "string") {
-        setStarted("Database error!");
-        return;
-      }
-      const playersRef = snapshot.child("players");
-      const playersVal = playersRef.val();
-      if (!Array.isArray(playersVal)) {
-        setStarted("Database error!");
-        return;
-      }
-      const players = playersVal.map((uid) => playerForUid(uid));
-      setStarted({ admin, players });
-    });
-
     for (const { path, setter, codec } of [
       {
+        path: "lobby",
+        setter: mappedSetter(
+          setLobbyPlayers,
+          (xs: t.TypeOf<typeof LobbyCodec>) =>
+            Object.values(xs).map(({ uid }) => playerForUid(uid))
+        ),
+        codec: LobbyCodec,
+      },
+      {
         path: "started",
-        setter: (v: t.TypeOf<typeof StartedCodec> | string | undefined) => {
-          if (typeof v === "object") {
-            const { admin, players } = v;
-            setStarted({
-              admin,
-              players: players.map((uid: string) => playerForUid(uid)),
-            });
-            return;
-          }
-          setStarted(v);
-        },
+        setter: mappedSetter(setStarted, (x: t.TypeOf<typeof StartedCodec>) => {
+          const { admin, players } = x;
+          return {
+            admin,
+            players: players.map((uid: string) => playerForUid(uid)),
+          };
+        }),
         codec: StartedCodec,
       },
       { path: "metaprompt", setter: setMetaprompt, codec: MetapromptCodec },
@@ -178,6 +167,7 @@ const useStateFromDatabase = (
       { path: "images", setter: setImages, codec: UIDToStringCodec },
       { path: "judgements", setter: setJudgements, codec: UIDToStringCodec },
       { path: "winner", setter: setWinner, codec: WinnerCodec },
+      { path: "completed", setter: setCompleted, codec: t.boolean },
     ]) {
       onValue(ref(database, `games/${gameId}/${path}`), (snapshot) => {
         if (!snapshot.exists()) {
@@ -186,6 +176,7 @@ const useStateFromDatabase = (
         }
         match(
           () => {
+            console.warn("FAILED TO DECODE", path, snapshot.val());
             setter("Database error!");
           },
           (v) => {
@@ -204,6 +195,7 @@ const useStateFromDatabase = (
         "images",
         "judgements",
         "winner",
+        "completed",
       ]) {
         off(ref(database, `games/${gameId}/${path}`));
       }
@@ -246,7 +238,6 @@ const useStateFromDatabase = (
 
   if (started !== undefined) {
     const common = { players: started.players, gameId, admin: started.admin };
-    console.warn(started, metaprompt, prompts, images, judgements, winner);
     if (metaprompt !== undefined) {
       return {
         status: "state",
@@ -287,13 +278,10 @@ const useStateFromDatabase = (
     };
   }
 
-  if (lobbyPlayers !== undefined) {
-    return {
-      status: "state",
-      state: { stage: "lobby", players: lobbyPlayers, gameId, startGame },
-    };
-  }
-  return undefined;
+  return {
+    status: "state",
+    state: { stage: "lobby", players: lobbyPlayers ?? [], gameId, startGame },
+  };
 };
 
 export default useStateFromDatabase;

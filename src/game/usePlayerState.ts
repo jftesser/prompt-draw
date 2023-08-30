@@ -5,13 +5,7 @@ import {
   MetapromptState as MetapromptPlayerState,
   PlayerState,
 } from "./PlayerState";
-import {
-  LobbyState,
-  IntroState,
-  Player,
-  State,
-  MainGameState,
-} from "./State";
+import { LobbyState, IntroState, Player, State, MainGameState } from "./State";
 import useStateFromDatabase from "./useStateFromDatabase";
 import { unreachable } from "../Utils";
 
@@ -60,7 +54,7 @@ export const playerLobbyFromLobby = (
     return { status: "error", error: "Player not found" };
   }
   if (state.players[0]?.uid === uid) {
-    const controls = otherPlayers
+    const controls = otherPlayers.length
       ? {
           startGame: state.startGame,
         }

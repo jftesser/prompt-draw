@@ -6,6 +6,7 @@ import Lobby from "./Lobby";
 import Intro from "./Intro";
 import { unreachable } from "../Utils";
 import MainGame from "./MainGame";
+import Completed from "./Completed";
 
 const Display: FC<{ state: State }> = ({ state }) => {
   if (state.stage === "lobby") {
@@ -17,6 +18,10 @@ const Display: FC<{ state: State }> = ({ state }) => {
   if (state.stage === "main") {
     return <MainGame state={state} />;
   }
+  if (state.stage === "completed") {
+    return <Completed state={state} />;
+  }
+
   return unreachable(state);
 };
 

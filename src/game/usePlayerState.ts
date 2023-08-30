@@ -3,9 +3,17 @@ import {
   LobbyState as LobbyPlayerState,
   IntroState as IntroPlayerState,
   MetapromptState as MetapromptPlayerState,
+  CompletedState as CompletedPlayerState,
   PlayerState,
 } from "./PlayerState";
-import { LobbyState, IntroState, Player, State, MainGameState } from "./State";
+import {
+  LobbyState,
+  IntroState,
+  Player,
+  State,
+  MainGameState,
+  CompletedState,
+} from "./State";
 import useStateFromDatabase from "./useStateFromDatabase";
 import { unreachable } from "../Utils";
 
@@ -22,6 +30,11 @@ type ResolvedIntroState = {
 type ResolvedMetapromptState = {
   status: "state";
   state: MetapromptPlayerState;
+};
+
+type ResolvedCompletedState = {
+  status: "state";
+  state: CompletedPlayerState;
 };
 
 export type ResolvedState = {
@@ -109,6 +122,25 @@ const playerMetapromptFromMetaprompt = (
   };
 };
 
+const playerCompletedFromCompleted = (
+  state: CompletedState,
+  uid: string
+): ResolvedCompletedState | PlayerError => {
+  const otherPlayers = getOtherPlayers(state.players, uid);
+  if (otherPlayers === undefined) {
+    return { status: "error", error: "Player not found" };
+  }
+  return {
+    status: "state",
+    state: {
+      stage: "completed",
+      otherPlayers,
+      gameId: state.gameId,
+      winner: state.winner,
+    },
+  };
+};
+
 export const playerStateFromGameState = (
   state: State,
   uid: string
@@ -121,6 +153,9 @@ export const playerStateFromGameState = (
   }
   if (state.stage === "main") {
     return playerMetapromptFromMetaprompt(state, uid);
+  }
+  if (state.stage === "completed") {
+    return playerCompletedFromCompleted(state, uid);
   }
 
   return unreachable(state);

@@ -6,6 +6,7 @@ import Lobby from "./Lobby";
 import Intro from "./Intro";
 import Metaprompt from "./Metaprompt";
 import { unreachable } from "../Utils";
+import Completed from "./Completed";
 
 const Display: FC<{ state: PlayerState }> = ({ state }) => {
   if (state.stage === "lobby") {
@@ -16,6 +17,9 @@ const Display: FC<{ state: PlayerState }> = ({ state }) => {
   }
   if (state.stage === "metaprompt") {
     return <Metaprompt state={state} />;
+  }
+  if (state.stage === "completed") {
+    return <Completed state={state} />;
   }
   return unreachable(state);
 };

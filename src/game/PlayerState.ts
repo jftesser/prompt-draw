@@ -24,4 +24,11 @@ export type MetapromptState = CommonState & {
   //   addPrompt: (prompt: string) => Promise<void>; TODO
 };
 
-export type PlayerState = LobbyState | IntroState | MetapromptState;
+export type CompletedState = CommonState & {
+    stage: "completed";
+    winner: Player;
+    //   addPrompt: (prompt: string) => Promise<void>; TODO
+  };
+  
+
+export type PlayerState = LobbyState | IntroState | MetapromptState | CompletedState;

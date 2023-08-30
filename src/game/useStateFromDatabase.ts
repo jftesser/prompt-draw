@@ -235,9 +235,23 @@ const useStateFromDatabase = (
   if (typeof winner === "string") {
     return { status: "error", error: winner };
   }
+  if (typeof completed === "string") {
+    return { status: "error", error: completed };
+  }
 
   if (started !== undefined) {
     const common = { players: started.players, gameId, admin: started.admin };
+    if (completed !== undefined && winner !== undefined) {
+      return {
+        status: "state",
+        state: {
+          ...common,
+          stage: "completed",
+          winner: playerForUid(winner.uid),
+        },
+      };
+    }
+
     if (metaprompt !== undefined) {
       return {
         status: "state",

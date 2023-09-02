@@ -1,7 +1,9 @@
+import { match } from "fp-ts/lib/Either";
 import { extractJSON } from "./Utils";
 import { getChat, getImage } from "./firebase/firebaseSetup";
-import { Metaprompt } from "./game/State";
+import { Metaprompt, WinnerData } from "./game/State";
 import { Message } from "./types";
+import * as t from "io-ts";
 
 const systemNote = `You are a fun and snarky party game. You simulate a demanding celebrity client who needs an outfit for an upcoming red carpet. You will identify yourself and create a brief for a bunch of up-and-coming designers (the players). The players will describe outfits that meet your brief and you will judge them on which one you like most. Always write in the first person. You’re yelling directly at these people!
 
@@ -41,75 +43,128 @@ Think about the garments you’ve seen, which one best fulfills your brief and m
 \`\`\`
 
 You will be prompted to complete each step, one at a time.
-`
+`;
 
 const getMessagesStepOne = (): Message[] => {
-    const messages: Message[] = [{
-        "role": "system",
-        "content": systemNote
-    }];
-    return messages;
-}
+  const messages: Message[] = [
+    {
+      role: "system",
+      content: systemNote,
+    },
+  ];
+  return messages;
+};
 
-const getMessagesStepTwo = (metaprompt: Metaprompt, prompts: {[uid: string]: string}): Message[] => {
-    const messages: Message[] = [
-        {
-            "role":"assistant",
-            "content": JSON.stringify(metaprompt)
-        },
-        {
-            "role": "user",
-            "content": `Step 2 ${JSON.stringify(prompts)}`
-        }
-    ];
+const getMessagesStepTwo = (
+  metaprompt: Metaprompt,
+  prompts: { [uid: string]: string }
+): Message[] => {
+  const messages: Message[] = [
+    {
+      role: "assistant",
+      content: JSON.stringify(metaprompt),
+    },
+    {
+      role: "user",
+      content: `Step 2 ${JSON.stringify(prompts)}`,
+    },
+  ];
 
-    return [...getMessagesStepOne(), ...messages];
-}
+  return [...getMessagesStepOne(), ...messages];
+};
 
-const getMessagesStepThree = (metaprompt: Metaprompt, prompts: {[uid: string]: string}, judgements: { [uid: string]: string }): Message[] => {
-    const messages: Message[] = [
-        {
-            "role":"assistant",
-            "content": JSON.stringify(judgements)
-        },
-        {
-            "role": "user",
-            "content": `Step 3`
-        }
-    ];
+const getMessagesStepThree = (
+  metaprompt: Metaprompt,
+  prompts: { [uid: string]: string },
+  judgements: { [uid: string]: string }
+): Message[] => {
+  const messages: Message[] = [
+    {
+      role: "assistant",
+      content: JSON.stringify(judgements),
+    },
+    {
+      role: "user",
+      content: `Step 3`,
+    },
+  ];
 
-    return [...getMessagesStepTwo(metaprompt, prompts), ...messages];
-}
+  return [...getMessagesStepTwo(metaprompt, prompts), ...messages];
+};
 
 const getObject = async (messages: Message[]) => {
-    const ret = await getChat({
-        messages,
-        temp: 0.7,
-        model: "gpt-4"
-    });
-    const mess = ret.data as Message;
-    const obj = extractJSON(mess.content);
-    return obj;
-}
+  const ret = await getChat({
+    messages,
+    temp: 0.7,
+    model: "gpt-4",
+  });
+  const mess = ret.data as Message;
+  const obj = extractJSON(mess.content);
+  return obj;
+};
 
 export const stepOne = async () => {
-    const obj = await getObject(getMessagesStepOne());
-    return {
-     celebrity: obj["Celebrity name"],
-     metaprompt: obj["Message"]
-    };
-}
+  const obj = await getObject(getMessagesStepOne());
+  return {
+    celebrity: obj["Celebrity name"],
+    metaprompt: obj["Message"],
+  };
+};
 
-export const stepTwo = async(metaprompt: Metaprompt, prompts: {[uid: string]: string}) => {
-    return getObject(getMessagesStepTwo(metaprompt, prompts));
-}
+export type StepTwoData = { [uid: string]: string };
 
-export const stepThree = async(metaprompt: Metaprompt, prompts: {[uid: string]: string}, judgements: { [uid: string]: string }) => {
-    return getObject(getMessagesStepThree(metaprompt, prompts, judgements));
-}
+const StepTwoCodec = t.record(t.string, t.string);
+
+export const stepTwo = async (
+  metaprompt: Metaprompt,
+  prompts: { [uid: string]: string }
+): Promise<StepTwoData> => {
+  const raw = await getObject(getMessagesStepTwo(metaprompt, prompts));
+  // TODO - try again on failure?
+  const parsed = match(
+    () => {
+      throw new Error("Invalid Response");
+    },
+    (d: StepTwoData) => d
+  )(StepTwoCodec.decode(raw));
+  if (Object.keys(prompts).some((uid) => !Object.hasOwn(parsed, uid))) {
+    throw new Error("Invalid Response");
+  }
+  return parsed;
+};
+
+const StepThreeCodec = t.type({
+  Winner: t.string,
+  Message: t.string,
+});
+
+export const stepThree = async (
+  metaprompt: Metaprompt,
+  prompts: { [uid: string]: string },
+  judgements: { [uid: string]: string }
+): Promise<WinnerData> => {
+  // TODO - try again on failure?
+  const raw = await getObject(
+    getMessagesStepThree(metaprompt, prompts, judgements)
+  );
+  console.warn(raw);
+  const parsed = match(
+    () => {
+      throw new Error("Invalid Response");
+    },
+    (d: t.TypeOf<typeof StepThreeCodec>) => d
+  )(StepThreeCodec.decode(raw));
+  if (!Object.hasOwn(prompts, parsed.Winner)) {
+    throw new Error("Invalid Response - invalid player!");
+  }
+  return {
+    uid: parsed.Winner,
+    message: parsed.Message,
+  };
+};
 
 export const getImageURL = async (prompt: string, celebrity: string) => {
-    const fullPrompt = `Full body red carpet photo of ${celebrity} wearing ${prompt}`;
-    const urls = (await getImage(fullPrompt)).data as string[];
-    return urls[0];
-}
+  const fullPrompt = `Full body red carpet photo of ${celebrity} wearing ${prompt}`;
+  const urls = (await getImage(fullPrompt)).data as string[];
+  return urls[0];
+};

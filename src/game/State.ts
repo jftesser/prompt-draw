@@ -50,7 +50,7 @@ export type MainGameState = CommonStartedState & {
   judgements: { [uid: string]: string };
 
   // Data about the winner, after that comes in.
-  winner?: WinnerData;
+  winner: WinnerData | undefined;
 
   // Called by each player - set their own prompt
   addPrompt: (uid: string, prompt: string) => Promise<void>;

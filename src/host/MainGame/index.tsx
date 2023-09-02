@@ -1,78 +1,122 @@
-import { FC, useMemo, useState } from "react";
-import { MainGameState, Player } from "../../game/State";
-import { ViewState } from "./ViewState";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { MainGameState } from "../../game/State";
 import Display from "./Display";
-import { stat } from "fs";
-
-type Judgement = {
-  player: Player;
-  markFinished: () => void;
-};
-
-export const createViewState = (
-  state: MainGameState,
-  nextJudgement: Judgement | undefined
-): ViewState => {
-  if (
-    state.players.some((player) => !Object.hasOwn(state.prompts, player.uid))
-  ) {
-    return {
-      stage: "metaprompt",
-      metaprompt: state.metaprompt,
-    };
-  }
-
-  if (
-    state.players.some((player) => !Object.hasOwn(state.images, player.uid)) ||
-    state.players.some((player) => !Object.hasOwn(state.judgements, player.uid))
-  ) {
-    return { stage: "generating" };
-  }
-
-  if (nextJudgement) {
-    if (
-      state.players.find(
-        (player) => player.uid === nextJudgement.player.uid
-      ) === undefined
-    ) {
-      throw new Error("Internal error - unexpected player");
-    }
-
-    // Note - we checked above that all players have a judgement and image
-    const image = state.judgements[nextJudgement.player.uid] as string;
-    const judgement = state.judgements[nextJudgement.player.uid] as string;
-    return {
-      stage: "judging",
-      player: nextJudgement.player.name,
-      image,
-      judgement,
-      markFinished: nextJudgement.markFinished,
-    };
-  }
-
-  if (state.winner === undefined) {
-    return {
-      stage: "generating",
-    };
-  }
-  const winner = state.winner;
-
-  const winnerPlayer = state.players.find(
-    (player) => winner.uid === player.uid
-  );
-  if (!winnerPlayer) {
-    throw new Error("Internal error - unexpected player");
-  }
-  return {
-    stage: "winner",
-    winner: winnerPlayer.name,
-    message: winner.message,
-    markCompleted: state.markCompleted,
-  };
-};
+import createViewState from "./createViewState";
+import { getImageURL, stepTwo, stepThree } from "../../gpt";
 
 const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
   const [displayedJudgements, setDisplayedJudgement] = useState<string[]>([]);
+  const imageCancelers = useRef<{
+    [uid: string]: { prompt: string; celebrity: string; cancel: () => void };
+  }>({});
+
+  const {
+    winner,
+    images,
+    addImage,
+    prompts,
+    players,
+    judgements,
+    addJudgement,
+    addWinner,
+    metaprompt: { celebrity, metaprompt },
+  } = state;
+
+  useEffect(() => {
+    // Cancel any images that don't match the current prompt
+    for (const [
+      uid,
+      { prompt, celebrity: celebrity_, cancel },
+    ] of Object.entries(imageCancelers.current)) {
+      if (prompt !== prompts[uid] || celebrity !== celebrity_) {
+        cancel();
+        delete imageCancelers.current[uid];
+      }
+    }
+
+    // Get images for any new prompts
+    for (const [uid, prompt] of Object.entries(prompts)) {
+      if (
+        !Object.hasOwn(images, uid) &&
+        !Object.hasOwn(imageCancelers.current, uid)
+      ) {
+        const canceled = { current: false };
+        (async () => {
+          const image = await getImageURL(prompt, celebrity);
+          if (canceled.current) {
+            return;
+          }
+          delete imageCancelers.current[uid];
+          await addImage(uid, image);
+        })();
+        imageCancelers.current[uid] = {
+          prompt,
+          celebrity,
+          cancel: () => {
+            canceled.current = true;
+          },
+        };
+      }
+    }
+  }, [addImage, celebrity, images, prompts]);
+
+  // Judge when appropriate
+  useEffect(() => {
+    // Return if we already have all judgement data
+    if (players.every((player) => Object.hasOwn(judgements, player.uid))) {
+      return;
+    }
+
+    // Return if any player doesn't have a prompt
+    if (players.some((player) => !Object.hasOwn(prompts, player.uid))) {
+      return;
+    }
+
+    const canceled = { current: false };
+    (async () => {
+      const judgements = await stepTwo({ celebrity, metaprompt }, prompts);
+      if (canceled.current) {
+        return;
+      }
+      for (const [uid, judgement] of Object.entries(judgements)) {
+        addJudgement(uid, judgement);
+      }
+    })();
+
+    return () => {
+      canceled.current = true;
+    };
+  }, [addJudgement, celebrity, judgements, metaprompt, players, prompts]);
+
+  // Choose winner when appropriate
+  useEffect(() => {
+    // If we already have a winner, don't need anything
+    if (winner) {
+      return;
+    }
+
+    // If we are missing judgements, we aren't ready yet
+    if (players.some((player) => !Object.hasOwn(judgements, player.uid))) {
+      return;
+    }
+
+    const canceled = { current: false };
+    (async () => {
+      const newWinner = await stepThree(
+        { celebrity, metaprompt },
+        prompts,
+        judgements
+      );
+      if (canceled.current) {
+        return;
+      }
+      await addWinner(newWinner);
+    })();
+    return () => {
+      canceled.current = true;
+    };
+  }, [addWinner, celebrity, judgements, metaprompt, players, prompts, winner]);
+
   const nextJudgement = useMemo(() => {
     const player = state.players.find((player) => {
       return !displayedJudgements.includes(player.uid);

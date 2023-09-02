@@ -262,6 +262,7 @@ const useStateFromDatabase = (
           prompts: prompts ?? {},
           images: images ?? {},
           judgements: judgements ?? {},
+          winner,
           markCompleted,
           addPrompt: async (uid: string, prompt: string) => {
             await set(ref(database, `games/${gameId}/prompts/${uid}`), prompt);

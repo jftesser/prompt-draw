@@ -51,6 +51,10 @@ const getMessagesStepOne = (): Message[] => {
       role: "system",
       content: systemNote,
     },
+    {
+      role: "user",
+      content: `Step 1`,
+    },
   ];
   return messages;
 };
@@ -98,6 +102,7 @@ const getObject = async (messages: Message[]) => {
     temp: 0.7,
     model: "gpt-4",
   });
+  console.log(ret);
   const mess = ret.data as Message;
   const obj = extractJSON(mess.content);
   return obj;

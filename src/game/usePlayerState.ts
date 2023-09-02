@@ -1,7 +1,9 @@
 import {
   LobbyState as LobbyPlayerState,
   IntroState as IntroPlayerState,
-  MetapromptState as MetapromptPlayerState,
+  GetPromptState,
+  WaitingForOthersState,
+  EndgameState,
   CompletedState as CompletedPlayerState,
   PlayerState,
 } from "./PlayerState";
@@ -16,24 +18,9 @@ import {
 import useStateFromDatabase from "./useStateFromDatabase";
 import { unreachable } from "../Utils";
 
-type ResolvedLobbyState = {
+type ResolvedSpecificState<State> = {
   status: "state";
-  state: LobbyPlayerState;
-};
-
-type ResolvedIntroState = {
-  status: "state";
-  state: IntroPlayerState;
-};
-
-type ResolvedMetapromptState = {
-  status: "state";
-  state: MetapromptPlayerState;
-};
-
-type ResolvedCompletedState = {
-  status: "state";
-  state: CompletedPlayerState;
+  state: State;
 };
 
 export type ResolvedState = {
@@ -60,7 +47,7 @@ const getOtherPlayers = (
 export const playerLobbyFromLobby = (
   state: LobbyState,
   uid: string
-): ResolvedLobbyState | PlayerError => {
+): ResolvedSpecificState<LobbyPlayerState> | PlayerError => {
   const otherPlayers = getOtherPlayers(state.players, uid);
   if (otherPlayers === undefined) {
     return { status: "error", error: "Player not found" };
@@ -91,7 +78,7 @@ export const playerLobbyFromLobby = (
 const playerIntroFromIntro = (
   state: IntroState,
   uid: string
-): ResolvedIntroState | PlayerError => {
+): ResolvedSpecificState<IntroPlayerState> | PlayerError => {
   const otherPlayers = getOtherPlayers(state.players, uid);
   if (otherPlayers === undefined) {
     return { status: "error", error: "Player not found" };
@@ -102,21 +89,45 @@ const playerIntroFromIntro = (
   };
 };
 
-const playerMetapromptFromMetaprompt = (
+const getPlayerStateFromMainGameState = (
   state: MainGameState,
   uid: string
-): ResolvedMetapromptState | PlayerError => {
+):
+  | ResolvedSpecificState<GetPromptState | WaitingForOthersState | EndgameState>
+  | PlayerError => {
   const otherPlayers = getOtherPlayers(state.players, uid);
   if (otherPlayers === undefined) {
     return { status: "error", error: "Player not found" };
   }
+  const common = { otherPlayers, gameId: state.gameId };
+  if (Object.hasOwn(state.prompts, uid)) {
+    return otherPlayers.every((player) =>
+      Object.hasOwn(state.prompts, player.uid)
+    )
+      ? {
+          status: "state",
+          state: {
+            ...common,
+            stage: "endgame",
+          },
+        }
+      : {
+          status: "state",
+          state: {
+            ...common,
+            stage: "waitingForOthers",
+          },
+        };
+  }
   return {
     status: "state",
     state: {
-      stage: "metaprompt",
-      otherPlayers,
-      gameId: state.gameId,
+      ...common,
+      stage: "getPrompt",
       metaprompt: state.metaprompt,
+      getPrompt: async (prompt: string) => {
+        await state.addPrompt(uid, prompt);
+      },
     },
   };
 };
@@ -124,7 +135,7 @@ const playerMetapromptFromMetaprompt = (
 const playerCompletedFromCompleted = (
   state: CompletedState,
   uid: string
-): ResolvedCompletedState | PlayerError => {
+): ResolvedSpecificState<CompletedPlayerState> | PlayerError => {
   const otherPlayers = getOtherPlayers(state.players, uid);
   if (otherPlayers === undefined) {
     return { status: "error", error: "Player not found" };
@@ -151,7 +162,7 @@ export const playerStateFromGameState = (
     return playerIntroFromIntro(state, uid);
   }
   if (state.stage === "main") {
-    return playerMetapromptFromMetaprompt(state, uid);
+    return getPlayerStateFromMainGameState(state, uid);
   }
   if (state.stage === "completed") {
     return playerCompletedFromCompleted(state, uid);

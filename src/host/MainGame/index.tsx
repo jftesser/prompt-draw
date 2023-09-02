@@ -74,12 +74,17 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
 
     const canceled = { current: false };
     (async () => {
-      const judgements = await stepTwo({ celebrity, metaprompt }, prompts);
-      if (canceled.current) {
-        return;
-      }
-      for (const [uid, judgement] of Object.entries(judgements)) {
-        addJudgement(uid, judgement);
+      try {
+        const judgements = await stepTwo({ celebrity, metaprompt }, prompts);
+        if (canceled.current) {
+          return;
+        }
+        for (const [uid, judgement] of Object.entries(judgements)) {
+          addJudgement(uid, judgement);
+        }
+      } catch (error) {
+        // TODO - error handling
+        console.error("judging error:", error);
       }
     })();
 
@@ -102,15 +107,20 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
 
     const canceled = { current: false };
     (async () => {
-      const newWinner = await stepThree(
-        { celebrity, metaprompt },
-        prompts,
-        judgements
-      );
-      if (canceled.current) {
-        return;
+      try {
+        const newWinner = await stepThree(
+          { celebrity, metaprompt },
+          prompts,
+          judgements
+        );
+        if (canceled.current) {
+          return;
+        }
+        await addWinner(newWinner);
+      } catch (error) {
+        // TODO - error handling
+        console.error("getting winner error:", error);
       }
-      await addWinner(newWinner);
     })();
     return () => {
       canceled.current = true;

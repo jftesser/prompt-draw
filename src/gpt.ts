@@ -103,11 +103,20 @@ const getObject = async (messages: Message[]) => {
   return obj;
 };
 
-export const stepOne = async () => {
-  const obj = await getObject(getMessagesStepOne());
+const stepOneCodec = t.type({ Message: t.string, "Celebrity name": t.string });
+
+export const stepOne = async (): Promise<Metaprompt> => {
+  const raw = await getObject(getMessagesStepOne());
+  const parsed = match(
+    () => {
+      throw new Error("Invalid Response");
+    },
+    (d: t.TypeOf<typeof stepOneCodec>) => d
+  )(stepOneCodec.decode(raw));
+
   return {
-    celebrity: obj["Celebrity name"],
-    metaprompt: obj["Message"],
+    celebrity: parsed["Celebrity name"],
+    metaprompt: parsed["Message"],
   };
 };
 

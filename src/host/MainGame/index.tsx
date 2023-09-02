@@ -42,12 +42,17 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
       ) {
         const canceled = { current: false };
         (async () => {
-          const image = await getImageURL(prompt, celebrity);
-          if (canceled.current) {
-            return;
+          try {
+            const image = await getImageURL(prompt, celebrity);
+            if (canceled.current) {
+              return;
+            }
+            delete imageCancelers.current[uid];
+            await addImage(uid, image);
+          } catch (error) {
+            // TODO - error handling
+            console.error("image error:", error);
           }
-          delete imageCancelers.current[uid];
-          await addImage(uid, image);
         })();
         imageCancelers.current[uid] = {
           prompt,

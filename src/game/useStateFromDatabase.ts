@@ -101,13 +101,6 @@ const restartGameInternal = async (gameId: string) => {
   if (!startedSnap.exists()) return;
 
   const started = startedSnap.val();
-
-  console.log({
-    completed: false,
-    host,
-    lobby,
-    started,
-  });
   
   await set(ref(database, `games/${gameId}`), {
     completed: false,
@@ -192,15 +185,8 @@ const useStateFromDatabase = (
     if (gameId === undefined) {
       return;
     }
-    if (typeof lobbyPlayers !== "object") {
-      return;
-    }
-    if (typeof started !== "object") {
-      return;
-    }
-    console.log("RESTART");
     await restartGameInternal(gameId);
-  }, []);
+  }, [gameId]);
 
   useEffect(() => {
     if (!gameId) {

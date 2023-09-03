@@ -142,6 +142,11 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
         if (canceled.current) {
           return;
         }
+
+        // clear out the judgement history since we've gone through judging and have a winner
+        // TODO Russell - this doesn't seem to be enough, what am I missing to reset the winner and judgements on the host?
+        setDisplayedJudgement([]);
+
         await addWinner({uid: UIDFromName(newWinner.name), message: newWinner.message});
       } catch (error) {
         // TODO - error handling

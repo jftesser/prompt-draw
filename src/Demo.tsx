@@ -2,6 +2,7 @@ import "./Demo.scss";
 import { FC, FormEvent, useState } from "react";
 import { getImage } from "./firebase/firebaseSetup";
 import Chat from "./Chat";
+import { Input, Button } from '@chakra-ui/react';
 
 export const Demo: FC = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -31,7 +32,7 @@ export const Demo: FC = () => {
       <div>
         <h1>Get us an image for great good</h1>
         <form className="prompt-form" onSubmit={handlePrompt}>
-          <input
+          <Input
             type="text"
             placeholder="image prompt"
             value={prompt}
@@ -39,9 +40,9 @@ export const Demo: FC = () => {
             required
             disabled={awaitingImage}
           />
-          <button type="submit" disabled={awaitingImage}>
+          <Button type="submit" disabled={awaitingImage}>
             Get image
-          </button>
+          </Button>
         </form>
         {error && <p>{error}</p>}
         {imageUrl && <img src={imageUrl} alt="prompt response" />}

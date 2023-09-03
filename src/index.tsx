@@ -13,6 +13,15 @@ import Content from "./Content";
 import Host from "./host/";
 import Play from "./play/";
 import Demo from "./Demo";
+import { ChakraProvider } from '@chakra-ui/react';
+import { extendTheme, defineStyleConfig } from '@chakra-ui/react';
+
+const theme = extendTheme({
+  fonts: {
+    heading: `'Rubik 80s Fade', cursive`,
+    body: `'Rubik', sans-serif`,
+  },
+})
 
 const LoginAndRerouteToRoot = () => {
   const navigate = useNavigate();
@@ -52,7 +61,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <ChakraProvider theme={theme}>
+        <RouterProvider router={router} />
+      </ChakraProvider>
     </AuthProvider>
   </React.StrictMode>
 );

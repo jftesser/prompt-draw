@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { JudgingState } from "./ViewState";
 import "./Judging.scss";
+import { Button } from '@chakra-ui/react';
 
 const Judging: FC<{ state: JudgingState }> = ({ state }) => {
   return (
@@ -8,7 +9,7 @@ const Judging: FC<{ state: JudgingState }> = ({ state }) => {
       <span>{JSON.stringify(state)}</span>
       {state.image.status === "image" ? 
       <img src={state.image.url} alt="prompt response" /> : <div className="host-maingame-judging-censored">CENSORED</div>}
-      <button onClick={() => state.markFinished()}>Confirm</button>
+      <Button onClick={() => state.markFinished()}>Confirm</Button>
     </div>
   );
 };

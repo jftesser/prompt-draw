@@ -1,6 +1,7 @@
 import { FC, FormEvent, useState } from "react";
 import { Message } from "./types";
 import { getChat } from "./firebase/firebaseSetup";
+import { Input, Button } from '@chakra-ui/react';
 
 const Chat: FC = () => {
 
@@ -42,7 +43,7 @@ const Chat: FC = () => {
                 <h1>Chat</h1>
 
                 <form className="chat-form" onSubmit={handleSubmit}>
-                    <input
+                    <Input
                         type="text"
                         placeholder="system note"
                         value={systemNote}
@@ -68,7 +69,7 @@ const Chat: FC = () => {
                         required
                         disabled={awaitingChat}
                     />
-                    <button type="submit" disabled={awaitingChat}>Send</button>
+                    <Button type="submit" disabled={awaitingChat}>Send</Button>
                 </form>
                 {error && <p>{error}</p>}
             </div>

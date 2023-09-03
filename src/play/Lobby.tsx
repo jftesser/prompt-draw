@@ -1,5 +1,6 @@
 import { FC, useCallback } from "react";
 import { LobbyState } from "../game/PlayerState";
+import { Button } from '@chakra-ui/react';
 
 const Lobby: FC<{ state: LobbyState }> = ({ state }) => {
   const doStartGame = state.controls?.startGame;
@@ -10,7 +11,7 @@ const Lobby: FC<{ state: LobbyState }> = ({ state }) => {
     return (
       <>
         <div>{JSON.stringify(state)}</div>
-        <button onClick={startGame}>start</button>
+        <Button onClick={startGame}>start</Button>
       </>
     );
   }

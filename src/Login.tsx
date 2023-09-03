@@ -1,6 +1,7 @@
 import React, { FormEvent, useState } from "react";
 import { signIn } from "./firebase/firebaseSetup";
 import "./Login.scss";
+import { Input, Button } from '@chakra-ui/react';
 
 interface LoginPageProps {
   onLogin?: () => void;
@@ -26,21 +27,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       <div>
         <h1>Login</h1>
         <form className="login-form" onSubmit={handleLogin}>
-          <input
+          <Input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <input
+          <Input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button type="submit">Login</button>
+          <Button type="submit">Login</Button>
         </form>
         {error && <p>{error}</p>}
       </div>

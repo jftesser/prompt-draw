@@ -1,5 +1,6 @@
 import { FC, FormEvent, useCallback, useState } from "react";
 import { GetPromptState } from "../game/PlayerState";
+import { Button } from '@chakra-ui/react';
 
 const GetPrompt: FC<{ state: GetPromptState }> = ({ state }) => {
   const [prompt, setPrompt] = useState("");
@@ -22,7 +23,7 @@ const GetPrompt: FC<{ state: GetPromptState }> = ({ state }) => {
           onChange={(e) => setPrompt(e.target.value)}
           required
         />
-        <button type="submit">Set Prompt</button>
+        <Button type="submit">Set Prompt</Button>
       </form>
     </div>
   );

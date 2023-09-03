@@ -1,5 +1,6 @@
 import { FC, useCallback } from "react";
 import { CompletedState } from "../game/PlayerState";
+import { Button } from '@chakra-ui/react';
 
 const Completed: FC<{ state: CompletedState }> = ({ state }) => {
   const doRestartGame = state.controls?.restartGame;
@@ -10,7 +11,7 @@ const Completed: FC<{ state: CompletedState }> = ({ state }) => {
     return (
       <>
         <div>{JSON.stringify(state)}</div>
-        <button onClick={restartGame}>restart</button>
+        <Button onClick={restartGame}>restart</Button>
       </>
     );
   }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Metaprompt, Player, State, WinnerData } from "./State";
-import { off, onValue, ref, set } from "firebase/database";
+import { get, off, onValue, ref, set } from "firebase/database";
 import { database } from "../firebase/firebaseSetup";
 import * as t from "io-ts";
 import { match } from "fp-ts/Either";
@@ -83,6 +83,40 @@ const startGameInternal = async (
   });
 };
 
+const restartGameInternal = async (gameId: string) => {
+  console.log("RESTARTING");
+  // pulling values directly from the db as they have keys that aren't captured locally
+  const hostSnap = await get(ref(database, `games/${gameId}/host`));
+  if (!hostSnap.exists()) return;
+
+  const host = hostSnap.val();
+  
+
+  const lobbySnap = await get(ref(database, `games/${gameId}/lobby`));
+  if (!lobbySnap.exists()) return;
+
+  const lobby = lobbySnap.val();
+
+  const startedSnap = await get(ref(database, `games/${gameId}/started`));
+  if (!startedSnap.exists()) return;
+
+  const started = startedSnap.val();
+
+  console.log({
+    completed: false,
+    host,
+    lobby,
+    started,
+  });
+  
+  await set(ref(database, `games/${gameId}`), {
+    completed: false,
+    host,
+    lobby,
+    started,
+  });
+};
+
 const mappedSetter =
   <T, U extends object>(
     setter: (setter: T | undefined | string) => void,
@@ -153,6 +187,21 @@ const useStateFromDatabase = (
     }
     await startGameInternal(gameId, lobbyPlayers[0].uid, lobbyPlayers);
   }, [gameId, lobbyPlayers]);
+
+  const restartGame = useCallback(async () => {
+    if (gameId === undefined) {
+      return;
+    }
+    if (typeof lobbyPlayers !== "object") {
+      return;
+    }
+    if (typeof started !== "object") {
+      return;
+    }
+    console.log("RESTART");
+    await restartGameInternal(gameId);
+  }, []);
+
   useEffect(() => {
     if (!gameId) {
       return;
@@ -269,6 +318,7 @@ const useStateFromDatabase = (
           ...common,
           stage: "completed",
           winner: winnerPlayer,
+          restartGame
         },
       };
     }

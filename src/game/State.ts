@@ -70,8 +70,8 @@ export type MainGameState = CommonStartedState & {
 
 export type CompletedState = CommonStartedState & {
   stage: "completed";
-
   winner: Player;
+  restartGame: () => Promise<void>;
 };
 
 export type State = LobbyState | IntroState | MainGameState | CompletedState;

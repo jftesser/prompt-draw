@@ -10,6 +10,10 @@ export type LobbyControls = {
   startGame?: () => Promise<void>;
 };
 
+export type CompletedControls = {
+  restartGame?: () => Promise<void>;
+};
+
 export type LobbyState = CommonState & {
   stage: "lobby";
   controls?: LobbyControls;
@@ -36,6 +40,7 @@ export type EndgameState = CommonState & {
 export type CompletedState = CommonState & {
   stage: "completed";
   winner: Player;
+  controls?: CompletedControls;
 };
 
 export type PlayerState =

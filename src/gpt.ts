@@ -45,6 +45,26 @@ Think about the garments you’ve seen, which one best fulfills your brief and m
 You will be prompted to complete each step, one at a time.
 `;
 
+// TODO Russell - I think this messes with your parsing stuff, so maybe you can rewrite?
+const fixKeyCase = (refObj: { [name: string]: string }, transObj: { [name: string]: string }) => {
+    const refKeys = Object.keys(refObj);
+    const newObj: { [name: string]: any } = {};
+    for (const [transName, value] of Object.entries(transObj)) {
+        const refName = refKeys.find((name) => name.toLowerCase() === transName.toLowerCase());
+        if (refName) {
+            newObj[refName] = value;
+        }
+    }
+    return newObj;
+};
+
+const fixCase = (refObj: { [name: string]: string }, transName: string) => {
+    const refKeys = Object.keys(refObj);
+    const refName = refKeys.find((name) => name.toLowerCase() === transName.toLowerCase());
+    if (refName) return refName;
+    return transName;
+};
+
 const getMessagesStepOne = (): Message[] => {
   const messages: Message[] = [
     {
@@ -133,7 +153,7 @@ export const stepTwo = async (
   metaprompt: Metaprompt,
   prompts: { [name: string]: string }
 ): Promise<StepTwoData> => {
-  const raw = await getObject(getMessagesStepTwo(metaprompt, prompts));
+  const raw = fixKeyCase(prompts, await getObject(getMessagesStepTwo(metaprompt, prompts)));
   // TODO - try again on failure?
   const parsed = match(
     () => {
@@ -161,6 +181,7 @@ export const stepThree = async (
   const raw = await getObject(
     getMessagesStepThree(metaprompt, prompts, judgements)
   );
+
   console.warn(raw);
   const parsed = match(
     () => {
@@ -168,6 +189,9 @@ export const stepThree = async (
     },
     (d: t.TypeOf<typeof StepThreeCodec>) => d
   )(StepThreeCodec.decode(raw));
+
+  parsed.Winner = fixCase(prompts, parsed.Winner);
+
   if (!Object.hasOwn(prompts, parsed.Winner)) {
     throw new Error("Invalid Response - invalid player!");
   }

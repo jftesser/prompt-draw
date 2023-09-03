@@ -141,16 +141,36 @@ const playerCompletedFromCompleted = (
   if (otherPlayers === undefined) {
     return { status: "error", error: "Player not found" };
   }
-  return {
-    status: "state",
-    state: {
-      stage: "completed",
-      uid,
-      otherPlayers,
-      gameId: state.gameId,
-      winner: state.winner,
-    },
-  };
+
+  if (state.players[0]?.uid === uid) {
+    const controls = otherPlayers.length
+      ? {
+          restartGame: state.restartGame,
+        }
+      : {};
+    return {
+      status: "state",
+      state: {
+        stage: "completed",
+        uid,
+        otherPlayers,
+        gameId: state.gameId,
+        winner: state.winner,
+        controls
+      },
+    };
+  } else {
+    return {
+      status: "state",
+      state: {
+        stage: "completed",
+        uid,
+        otherPlayers,
+        gameId: state.gameId,
+        winner: state.winner,
+      },
+    };
+  }
 };
 
 export const playerStateFromGameState = (

@@ -23,7 +23,7 @@ const Intro: FC<{ state: IntroState }> = ({ state }) => {
   }, [moveToMetaprompt]);
   return <Flex direction="column" align="center">
     <Spinner mb="1em" />
-    <Text>Your new client is contemplating their clothing desires...</Text>
+    <Text fontSize="2xl">Your new client is contemplating their clothing desires...</Text>
   </Flex>;
 };
 export default Intro;

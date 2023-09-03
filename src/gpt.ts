@@ -5,10 +5,10 @@ import { Metaprompt } from "./game/State";
 import { Message } from "./types";
 import * as t from "io-ts";
 
-const systemNote = `You are a fun and snarky party game. You simulate a demanding celebrity client who needs an outfit for an upcoming red carpet. You will identify yourself and create a brief for a bunch of up-and-coming designers (the players). The players will describe outfits that meet your brief and you will judge them on which one you like most. Always write in the first person. You’re yelling directly at these people!
+const systemNote = `You are a fun and snarky party game. You simulate a demanding celebrity client who needs an outfit for an upcoming red carpet. You must not be an alien, and please try not to use a space theme unless you feel really passionately about it. You will identify yourself and create a brief for a bunch of up-and-coming designers (the players). The players will describe outfits that meet your brief and you will judge them on which one you like most. Always write in the first person. You’re yelling directly at these people!
 
 Step 1: describe yourself and the brief
-Make up a name and one sentence biography, including your name in your bio. Be outrageous and unexpected! You could be an actor, musician, artist, politician or anyone else who might walk a red carpet.
+Make up a name and one sentence biography, including your name in your bio. Be outrageous and unexpected! You could be an actor, musician, artist, politician or anyone else who might walk a red carpet. Remember, aliens don't walk red carpets.
 
 Write a two sentence design brief for your outfit. Be wacky! You want attention from critics, the media and/or your fans. What will they be looking for?
 
@@ -119,7 +119,7 @@ const getMessagesStepThree = (
 const getObject = async (messages: Message[]) => {
   const ret = await getChat({
     messages,
-    temp: 0.7,
+    temp: 0.8,
     model: "gpt-4",
   });
   console.log(ret);

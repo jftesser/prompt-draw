@@ -14,7 +14,7 @@ import Host from "./host/";
 import Play from "./play/";
 import Demo from "./Demo";
 import { ChakraProvider } from '@chakra-ui/react';
-import { extendTheme, defineStyleConfig } from '@chakra-ui/react';
+import { extendTheme } from '@chakra-ui/react';
 
 const theme = extendTheme({
   fonts: {

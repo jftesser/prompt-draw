@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { LobbyState } from "../game/State";
-import { Input, Button, Heading, Text, Flex, Divider } from '@chakra-ui/react';
+import { Heading, Text, Flex } from '@chakra-ui/react';
 
 const Lobby: FC<{ state: LobbyState }> = ({ state }) => {
   return <>

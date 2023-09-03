@@ -4,7 +4,7 @@ import { Spinner, Flex, Text } from '@chakra-ui/react';
 
 const Generating: FC<{ state: GeneratingState }> = ({ state }) => {
   return <Flex direction="column" align="center">
-    <Spinner size="xl" />
+    <Spinner size="xl" mb="1em" />
     <Text fontSize="2xl">I'm judging you. Harshly.</Text>
   </Flex>;
 };

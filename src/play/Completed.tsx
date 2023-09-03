@@ -15,6 +15,6 @@ const Completed: FC<{ state: CompletedState }> = ({ state }) => {
       </>
     );
   }
-  return <><Spinner /><Text  mt="1em" fontSize="2xl">Want to play again? Ask <strong>{state.otherPlayers[0].name}</strong> to restart the game.</Text></>;
+  return <><Spinner size="xl" mb="1em"/><Text fontSize="2xl">Want to play again? Ask <strong>{state.otherPlayers[0].name}</strong> to restart the game.</Text></>;
 };
 export default Completed;

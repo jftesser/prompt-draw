@@ -29,6 +29,7 @@ const GetPrompt: FC<{ state: GetPromptState }> = ({ state }) => {
             required
           />
           <Button mt="1em" variant="outline" type="submit">Judge my creative soul</Button>
+          {/* TODO add cheating button */}
         </form>
       </div>
     </div>

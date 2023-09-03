@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Metaprompt, Player, State, WinnerData } from "./State";
+import { Metaprompt, Player, State, WinnerData, Image } from "./State";
 import { get, off, onValue, ref, set } from "firebase/database";
 import { database } from "../firebase/firebaseSetup";
 import * as t from "io-ts";
@@ -35,6 +35,14 @@ export type DBError = {
 };
 
 const UIDToStringCodec = t.record(t.string, t.string);
+
+const UIDToImageCodec = t.record(
+  t.string,
+  t.union([
+    t.type({ status: t.literal("censored") }),
+    t.type({ status: t.literal("image"), url: t.string }),
+  ])
+);
 
 type Started = {
   players: Player[];
@@ -140,7 +148,7 @@ const useStateFromDatabase = (
     undefined | { [uid: string]: string } | string
   >(undefined);
   const [images, setImages] = useState<
-    undefined | { [uid: string]: string } | string
+    undefined | { [uid: string]: Image } | string
   >(undefined);
   const [judgements, setJudgements] = useState<
     undefined | { [uid: string]: string } | string
@@ -193,33 +201,13 @@ const useStateFromDatabase = (
       return;
     }
 
-    for (const { path, setter, codec } of [
-      {
-        path: "lobby",
-        setter: mappedSetter(
-          setLobbyPlayers,
-          (xs: t.TypeOf<typeof LobbyCodec>) => Object.values(xs)
-        ),
-        codec: LobbyCodec,
-      },
-      {
-        path: "started",
-        setter: mappedSetter(setStarted, (x: t.TypeOf<typeof StartedCodec>) => {
-          const { admin, players } = x;
-          return {
-            admin,
-            players,
-          };
-        }),
-        codec: StartedCodec,
-      },
-      { path: "metaprompt", setter: setMetaprompt, codec: MetapromptCodec },
-      { path: "prompts", setter: setPrompts, codec: UIDToStringCodec },
-      { path: "images", setter: setImages, codec: UIDToStringCodec },
-      { path: "judgements", setter: setJudgements, codec: UIDToStringCodec },
-      { path: "winner", setter: setWinner, codec: WinnerCodec },
-      { path: "completed", setter: setCompleted, codec: t.boolean },
-    ]) {
+    type CodecData<T> = {
+      path: string;
+      setter: (x: T | undefined | string) => void;
+      codec: t.Type<T, unknown>;
+    };
+
+    const connect = <T>({ path, setter, codec }: CodecData<T>) => {
       onValue(ref(database, `games/${gameId}/${path}`), (snapshot) => {
         if (!snapshot.exists()) {
           setter(undefined);
@@ -235,7 +223,39 @@ const useStateFromDatabase = (
           }
         )(codec.decode(snapshot.val()));
       });
-    }
+    };
+    connect({
+      path: "lobby",
+      setter: mappedSetter(setLobbyPlayers, (xs: t.TypeOf<typeof LobbyCodec>) =>
+        Object.values(xs)
+      ),
+      codec: LobbyCodec,
+    });
+    connect({
+      path: "started",
+      setter: mappedSetter(setStarted, (x: t.TypeOf<typeof StartedCodec>) => {
+        const { admin, players } = x;
+        return {
+          admin,
+          players,
+        };
+      }),
+      codec: StartedCodec,
+    });
+    connect({
+      path: "metaprompt",
+      setter: setMetaprompt,
+      codec: MetapromptCodec,
+    });
+    connect({ path: "prompts", setter: setPrompts, codec: UIDToStringCodec });
+    connect({ path: "images", setter: setImages, codec: UIDToImageCodec });
+    connect({
+      path: "judgements",
+      setter: setJudgements,
+      codec: UIDToStringCodec,
+    });
+    connect({ path: "winner", setter: setWinner, codec: WinnerCodec });
+    connect({ path: "completed", setter: setCompleted, codec: t.boolean });
 
     return () => {
       for (const path of [
@@ -325,8 +345,8 @@ const useStateFromDatabase = (
           addPrompt: async (uid: string, prompt: string) => {
             await set(ref(database, `games/${gameId}/prompts/${uid}`), prompt);
           },
-          addImage: async (uid: string, url: string) => {
-            await set(ref(database, `games/${gameId}/images/${uid}`), url);
+          addImage: async (uid: string, image: Image) => {
+            await set(ref(database, `games/${gameId}/images/${uid}`), image);
           },
           addJudgement: async (uid: string, message: string) => {
             await set(

@@ -1,4 +1,4 @@
-import { Metaprompt } from "../../game/State";
+import { Metaprompt, Image } from "../../game/State";
 
 export type MetapromptState = {
   stage: "metaprompt";
@@ -13,7 +13,7 @@ export type JudgingState = {
   stage: "judging";
   player: string;
   judgement: string;
-  image: string;
+  image: Image;
   markFinished: () => void;
 };
 
@@ -21,7 +21,7 @@ export type WinnerRevealState = {
   stage: "winner";
   winner: string;
   message: string;
-  image: string;
+  image: Image;
   markCompleted: () => void;
 };
 

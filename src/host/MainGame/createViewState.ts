@@ -36,8 +36,8 @@ export const createViewState = (
     }
 
     // Note - we checked above that all players have a judgement and image
-    const image = state.images[nextJudgement.player.uid] as string;
-    const judgement = state.judgements[nextJudgement.player.uid] as string;
+    const image = state.images[nextJudgement.player.uid];
+    const judgement = state.judgements[nextJudgement.player.uid];
     return {
       stage: "judging",
       player: nextJudgement.player.name,

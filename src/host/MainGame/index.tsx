@@ -90,15 +90,17 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
         const canceled = { current: false };
         (async () => {
           try {
-            const image = await getImageURL(prompt, celebrity);
+            const url = await getImageURL(prompt, celebrity);
             if (canceled.current) {
               return;
             }
             delete imageCancelers.current[uid];
-            await addImage(uid, image);
+            await addImage(uid, { status: "image", url });
           } catch (error) {
-            // TODO - error handling
-            console.error("image error:", error);
+            // TODO - currently we treat every error as a content filter error.
+            // Ideally we would only treat content filter errors here, but this
+            // requires changes to the firebase function to not 500 on any error.
+            addImage(uid, { status: "censored" });
           }
         })();
         imageCancelers.current[uid] = {

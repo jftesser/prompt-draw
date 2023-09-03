@@ -32,6 +32,8 @@ export type WinnerData = {
   message: string;
 };
 
+export type Image = { status: "image"; url: string } | { status: "censored" };
+
 export type MainGameState = CommonStartedState & {
   stage: "main";
 
@@ -44,7 +46,7 @@ export type MainGameState = CommonStartedState & {
 
   // Images for each user's prompts.  These will be built "on the fly" - user
   // images will be added when they are created by the host.
-  images: { [uid: string]: string };
+  images: { [uid: string]: Image };
 
   // Judgements for each user's prompts
   judgements: { [uid: string]: string };
@@ -56,7 +58,7 @@ export type MainGameState = CommonStartedState & {
   addPrompt: (uid: string, prompt: string) => Promise<void>;
 
   // Called by the host - set the image for a prompt
-  addImage: (uid: string, url: string) => Promise<void>;
+  addImage: (uid: string, image: Image) => Promise<void>;
 
   // Called by the host - set the judgement for a prompt
   addJudgement: (uid: string, judgement: string) => Promise<void>;

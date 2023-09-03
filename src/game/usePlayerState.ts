@@ -62,6 +62,7 @@ export const playerLobbyFromLobby = (
       status: "state",
       state: {
         stage: "lobby",
+        uid,
         otherPlayers,
         gameId: state.gameId,
         controls,
@@ -70,7 +71,7 @@ export const playerLobbyFromLobby = (
   } else {
     return {
       status: "state",
-      state: { stage: "lobby", otherPlayers, gameId: state.gameId },
+      state: { stage: "lobby", uid, otherPlayers, gameId: state.gameId },
     };
   }
 };
@@ -85,7 +86,7 @@ const playerIntroFromIntro = (
   }
   return {
     status: "state",
-    state: { stage: "intro", otherPlayers, gameId: state.gameId },
+    state: { stage: "intro", uid, otherPlayers, gameId: state.gameId },
   };
 };
 
@@ -99,7 +100,7 @@ const getPlayerStateFromMainGameState = (
   if (otherPlayers === undefined) {
     return { status: "error", error: "Player not found" };
   }
-  const common = { otherPlayers, gameId: state.gameId };
+  const common = { uid, otherPlayers, gameId: state.gameId };
   if (Object.hasOwn(state.prompts, uid)) {
     return otherPlayers.every((player) =>
       Object.hasOwn(state.prompts, player.uid)
@@ -144,6 +145,7 @@ const playerCompletedFromCompleted = (
     status: "state",
     state: {
       stage: "completed",
+      uid,
       otherPlayers,
       gameId: state.gameId,
       winner: state.winner,

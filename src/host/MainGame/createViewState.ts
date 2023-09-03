@@ -64,6 +64,7 @@ export const createViewState = (
     stage: "winner",
     winner: winnerPlayer.name,
     message: winner.message,
+    image: state.images[winner.uid],
     markCompleted: state.markCompleted,
   };
 };

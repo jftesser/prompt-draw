@@ -3,6 +3,7 @@ import { Metaprompt, Player } from "./State";
 export type CommonState = {
   otherPlayers: Player[];
   gameId: string;
+  uid: string;
 };
 
 export type LobbyControls = {

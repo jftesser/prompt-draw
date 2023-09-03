@@ -21,6 +21,7 @@ export type WinnerRevealState = {
   stage: "winner";
   winner: string;
   message: string;
+  image: string;
   markCompleted: () => void;
 };
 

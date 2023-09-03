@@ -9,6 +9,7 @@ const Content: FC = () => {
   const navigate = useNavigate();
   const [working, setWorking] = useState(false);
   const [gameId, setGameId] = useState("");
+  const [playerName, setPlayerName] = useState("");
   const onMakeGame = useCallback(() => {
     setWorking(true);
     (async () => {
@@ -37,8 +38,7 @@ const Content: FC = () => {
           if (!auth.currentUser) {
             throw new Error("Not logged in");
           }
-
-          await joinGame(gameId, auth.currentUser.uid);
+          await joinGame(gameId, auth.currentUser.uid, playerName);
 
           navigate(`/play/${gameId}`);
         } catch (e) {
@@ -46,7 +46,7 @@ const Content: FC = () => {
         }
       })();
     },
-    [gameId, navigate]
+    [gameId, navigate, playerName]
   );
   return working ? (
     <></>
@@ -61,6 +61,13 @@ const Content: FC = () => {
           placeholder="game code"
           value={gameId}
           onChange={(e) => setGameId(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="your name"
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
           required
         />
         <button type="submit">Join Game</button>

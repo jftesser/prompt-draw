@@ -8,7 +8,7 @@ import {
 } from "firebase/database";
 import { database } from "./firebase/firebaseSetup";
 
-const joinGame = async (gameId: string, uid: string): Promise<void> => {
+const joinGame = async (gameId: string, uid: string, name: string): Promise<void> => {
   if (!gameId) {
     throw new Error("Invalid Game ID");
   }
@@ -32,7 +32,7 @@ const joinGame = async (gameId: string, uid: string): Promise<void> => {
   }
 
   // Add ourselves to the game!
-  await push(ref(database, `games/${gameId}/lobby`), { uid });
+  await push(ref(database, `games/${gameId}/lobby`), { uid, name });
 };
 
 export default joinGame;

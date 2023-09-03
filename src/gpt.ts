@@ -1,7 +1,7 @@
 import { match } from "fp-ts/lib/Either";
 import { extractJSON } from "./Utils";
 import { getChat, getImage } from "./firebase/firebaseSetup";
-import { Metaprompt, WinnerData } from "./game/State";
+import { Metaprompt } from "./game/State";
 import { Message } from "./types";
 import * as t from "io-ts";
 
@@ -61,7 +61,7 @@ const getMessagesStepOne = (): Message[] => {
 
 const getMessagesStepTwo = (
   metaprompt: Metaprompt,
-  prompts: { [uid: string]: string }
+  prompts: { [name: string]: string }
 ): Message[] => {
   const messages: Message[] = [
     {
@@ -79,8 +79,8 @@ const getMessagesStepTwo = (
 
 const getMessagesStepThree = (
   metaprompt: Metaprompt,
-  prompts: { [uid: string]: string },
-  judgements: { [uid: string]: string }
+  prompts: { [name: string]: string },
+  judgements: { [name: string]: string }
 ): Message[] => {
   const messages: Message[] = [
     {
@@ -125,13 +125,13 @@ export const stepOne = async (): Promise<Metaprompt> => {
   };
 };
 
-export type StepTwoData = { [uid: string]: string };
+export type StepTwoData = { [name: string]: string };
 
 const StepTwoCodec = t.record(t.string, t.string);
 
 export const stepTwo = async (
   metaprompt: Metaprompt,
-  prompts: { [uid: string]: string }
+  prompts: { [name: string]: string }
 ): Promise<StepTwoData> => {
   const raw = await getObject(getMessagesStepTwo(metaprompt, prompts));
   // TODO - try again on failure?
@@ -141,7 +141,7 @@ export const stepTwo = async (
     },
     (d: StepTwoData) => d
   )(StepTwoCodec.decode(raw));
-  if (Object.keys(prompts).some((uid) => !Object.hasOwn(parsed, uid))) {
+  if (Object.keys(prompts).some((name) => !Object.hasOwn(parsed, name))) {
     throw new Error("Invalid Response");
   }
   return parsed;
@@ -154,9 +154,9 @@ const StepThreeCodec = t.type({
 
 export const stepThree = async (
   metaprompt: Metaprompt,
-  prompts: { [uid: string]: string },
-  judgements: { [uid: string]: string }
-): Promise<WinnerData> => {
+  prompts: { [name: string]: string },
+  judgements: { [name: string]: string }
+): Promise<{name: string, message: string}> => {
   // TODO - try again on failure?
   const raw = await getObject(
     getMessagesStepThree(metaprompt, prompts, judgements)
@@ -172,7 +172,7 @@ export const stepThree = async (
     throw new Error("Invalid Response - invalid player!");
   }
   return {
-    uid: parsed.Winner,
+    name: parsed.Winner,
     message: parsed.Message,
   };
 };

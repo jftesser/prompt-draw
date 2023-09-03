@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MainGameState } from "../../game/State";
 import Display from "./Display";
 import createViewState from "./createViewState";
@@ -21,6 +21,26 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     addWinner,
     metaprompt: { celebrity, metaprompt },
   } = state;
+
+  const getPlayerNameFromUID = useCallback((uid: string) => {
+    const player = players.find((player) => player.uid === uid);
+    if (!player) return "Unknown Player";
+    return player.name;
+  }, [players]);
+
+  const UIDFromName = useCallback((name: string) => {
+    const player = players.find((player) => player.name === name);
+    if (!player) return "undefined";
+    return player.uid;
+  }, [players]);
+
+  const swapUIDForName = useCallback((obj: { [uid: string]: any }) => {
+    const newObj: { [name: string]: any } = {};
+    for (const [uid, value] of Object.entries(obj)) {
+      newObj[getPlayerNameFromUID(uid)] = value;
+    }
+    return newObj;
+  }, [getPlayerNameFromUID]);
 
   useEffect(() => {
     // Cancel any images that don't match the current prompt
@@ -67,6 +87,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
 
   // Judge when appropriate
   useEffect(() => {
+
     // Return if we already have all judgement data
     if (players.every((player) => Object.hasOwn(judgements, player.uid))) {
       return;
@@ -80,12 +101,12 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     const canceled = { current: false };
     (async () => {
       try {
-        const judgements = await stepTwo({ celebrity, metaprompt }, prompts);
+        const judgements = await stepTwo({ celebrity, metaprompt }, swapUIDForName(prompts));
         if (canceled.current) {
           return;
         }
-        for (const [uid, judgement] of Object.entries(judgements)) {
-          addJudgement(uid, judgement);
+        for (const [name, judgement] of Object.entries(judgements)) {
+          addJudgement(UIDFromName(name), judgement);
         }
       } catch (error) {
         // TODO - error handling
@@ -96,7 +117,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     return () => {
       canceled.current = true;
     };
-  }, [addJudgement, celebrity, judgements, metaprompt, players, prompts]);
+  }, [addJudgement, celebrity, judgements, metaprompt, players, prompts, UIDFromName, swapUIDForName]);
 
   // Choose winner when appropriate
   useEffect(() => {
@@ -115,13 +136,13 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
       try {
         const newWinner = await stepThree(
           { celebrity, metaprompt },
-          prompts,
-          judgements
+          swapUIDForName(prompts),
+          swapUIDForName(judgements)
         );
         if (canceled.current) {
           return;
         }
-        await addWinner(newWinner);
+        await addWinner({uid: UIDFromName(newWinner.name), message: newWinner.message});
       } catch (error) {
         // TODO - error handling
         console.error("getting winner error:", error);
@@ -130,7 +151,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     return () => {
       canceled.current = true;
     };
-  }, [addWinner, celebrity, judgements, metaprompt, players, prompts, winner]);
+  }, [addWinner, celebrity, judgements, metaprompt, players, prompts, winner, UIDFromName, swapUIDForName]);
 
   const nextJudgement = useMemo(() => {
     const player = state.players.find((player) => {

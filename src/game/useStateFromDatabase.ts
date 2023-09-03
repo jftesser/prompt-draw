@@ -5,11 +5,13 @@ import { database } from "../firebase/firebaseSetup";
 import * as t from "io-ts";
 import { match } from "fp-ts/Either";
 
-const LobbyCodec = t.record(t.string, t.type({ uid: t.string }));
+const PlayerCodec = t.type({ uid: t.string, name: t.string });
+
+const LobbyCodec = t.record(t.string, PlayerCodec);
 
 const StartedCodec = t.type({
   admin: t.string,
-  players: t.array(t.string),
+  players: t.array(PlayerCodec),
 });
 
 const MetapromptCodec = t.type({
@@ -39,11 +41,6 @@ type Started = {
   admin: string;
 };
 
-const playerForUid = (uid: string): Player => {
-  // TODO get display name
-  return { uid, name: uid };
-};
-
 const moveToMetapromptInternal = async (
   gameId: string,
   metaprompt: Metaprompt
@@ -60,9 +57,29 @@ const startGameInternal = async (
   admin: string,
   players: Player[]
 ): Promise<void> => {
+  // list of snarky adjectives to add to player names to make them unique
+  const adjectives = [
+    "the Great",
+    "the Magnificent",
+    "the Terrible",
+    "the Unstoppable",
+    "the Unbeatable",
+    "the Unbelievable",
+    "the Moderate",
+    "the Mediocre",
+    "the Average",
+  ];
+
+  players.forEach((player) => {
+    if (players.filter((p) => p.name === player.name).length > 1) {
+      const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+      player.name = `${player.name} ${adjective}`;
+    }
+  });
+
   await set(ref(database, `games/${gameId}/started`), {
     admin,
-    players: players.map((player) => player.uid),
+    players,
   });
 };
 
@@ -147,7 +164,7 @@ const useStateFromDatabase = (
         setter: mappedSetter(
           setLobbyPlayers,
           (xs: t.TypeOf<typeof LobbyCodec>) =>
-            Object.values(xs).map(({ uid }) => playerForUid(uid))
+            Object.values(xs)
         ),
         codec: LobbyCodec,
       },
@@ -157,7 +174,7 @@ const useStateFromDatabase = (
           const { admin, players } = x;
           return {
             admin,
-            players: players.map((uid: string) => playerForUid(uid)),
+            players,
           };
         }),
         codec: StartedCodec,
@@ -242,12 +259,16 @@ const useStateFromDatabase = (
   if (started !== undefined) {
     const common = { players: started.players, gameId, admin: started.admin };
     if (completed !== undefined && winner !== undefined) {
+      const winnerPlayer = started.players.find((player) => player.uid === winner.uid)
+      if (!winnerPlayer) {
+        return { status: "error", error: "Invalid winner" };
+      }
       return {
         status: "state",
         state: {
           ...common,
           stage: "completed",
-          winner: playerForUid(winner.uid),
+          winner: winnerPlayer,
         },
       };
     }

@@ -13,8 +13,6 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     [uid: string]: { prompt: string; celebrity: string; cancel: () => void };
   }>({});
 
-  console.warn("MAIN GAME", state);
-
   const {
     winner,
     images,
@@ -66,11 +64,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
         deleted.push(uid);
       }
       if (deleted.length) {
-        setDisplayedJudgement((prev) => {
-          const newDisplayed = update(prev, { $unset: deleted });
-          console.warn("DELETING DISPLAYED", newDisplayed);
-          return newDisplayed;
-        });
+        setDisplayedJudgement((prev) => update(prev, { $unset: deleted }));
       }
     }
   }, [displayedJudgements, judgements]);

@@ -72,7 +72,8 @@ const startGameInternal = async (
 
   players.forEach((player) => {
     if (players.filter((p) => p.name === player.name).length > 1) {
-      const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+      const adjective =
+        adjectives[Math.floor(Math.random() * adjectives.length)];
       player.name = `${player.name} ${adjective}`;
     }
   });
@@ -90,7 +91,6 @@ const restartGameInternal = async (gameId: string) => {
   if (!hostSnap.exists()) return;
 
   const host = hostSnap.val();
-  
 
   const lobbySnap = await get(ref(database, `games/${gameId}/lobby`));
   if (!lobbySnap.exists()) return;
@@ -101,7 +101,7 @@ const restartGameInternal = async (gameId: string) => {
   if (!startedSnap.exists()) return;
 
   const started = startedSnap.val();
-  
+
   await set(ref(database, `games/${gameId}`), {
     completed: false,
     host,
@@ -198,8 +198,7 @@ const useStateFromDatabase = (
         path: "lobby",
         setter: mappedSetter(
           setLobbyPlayers,
-          (xs: t.TypeOf<typeof LobbyCodec>) =>
-            Object.values(xs)
+          (xs: t.TypeOf<typeof LobbyCodec>) => Object.values(xs)
         ),
         codec: LobbyCodec,
       },
@@ -293,8 +292,10 @@ const useStateFromDatabase = (
 
   if (started !== undefined) {
     const common = { players: started.players, gameId, admin: started.admin };
-    if (completed !== undefined && winner !== undefined) {
-      const winnerPlayer = started.players.find((player) => player.uid === winner.uid)
+    if (completed && winner !== undefined) {
+      const winnerPlayer = started.players.find(
+        (player) => player.uid === winner.uid
+      );
       if (!winnerPlayer) {
         return { status: "error", error: "Invalid winner" };
       }
@@ -304,7 +305,7 @@ const useStateFromDatabase = (
           ...common,
           stage: "completed",
           winner: winnerPlayer,
-          restartGame
+          restartGame,
         },
       };
     }

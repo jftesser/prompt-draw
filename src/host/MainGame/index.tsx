@@ -3,12 +3,17 @@ import { MainGameState } from "../../game/State";
 import Display from "./Display";
 import createViewState from "./createViewState";
 import { getImageURL, stepTwo, stepThree } from "../../gpt";
+import update from "immutability-helper";
 
 const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
-  const [displayedJudgements, setDisplayedJudgement] = useState<string[]>([]);
+  const [displayedJudgements, setDisplayedJudgement] = useState<{
+    [uid: string]: string;
+  }>({});
   const imageCancelers = useRef<{
     [uid: string]: { prompt: string; celebrity: string; cancel: () => void };
   }>({});
+
+  console.warn("MAIN GAME", state);
 
   const {
     winner,
@@ -22,25 +27,53 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     metaprompt: { celebrity, metaprompt },
   } = state;
 
-  const getPlayerNameFromUID = useCallback((uid: string) => {
-    const player = players.find((player) => player.uid === uid);
-    if (!player) return "Unknown Player";
-    return player.name;
-  }, [players]);
+  const getPlayerNameFromUID = useCallback(
+    (uid: string) => {
+      const player = players.find((player) => player.uid === uid);
+      if (!player) return "Unknown Player";
+      return player.name;
+    },
+    [players]
+  );
 
-  const UIDFromName = useCallback((name: string) => {
-    const player = players.find((player) => player.name === name);
-    if (!player) return "undefined";
-    return player.uid;
-  }, [players]);
+  const UIDFromName = useCallback(
+    (name: string) => {
+      const player = players.find((player) => player.name === name);
+      if (!player) return "undefined";
+      return player.uid;
+    },
+    [players]
+  );
 
-  const swapUIDForName = useCallback((obj: { [uid: string]: any }) => {
-    const newObj: { [name: string]: any } = {};
-    for (const [uid, value] of Object.entries(obj)) {
-      newObj[getPlayerNameFromUID(uid)] = value;
+  const swapUIDForName = useCallback(
+    (obj: { [uid: string]: any }) => {
+      const newObj: { [name: string]: any } = {};
+      for (const [uid, value] of Object.entries(obj)) {
+        newObj[getPlayerNameFromUID(uid)] = value;
+      }
+      return newObj;
+    },
+    [getPlayerNameFromUID]
+  );
+
+  // Clear out any displayed prompts which are no longer valid.
+  useEffect(() => {
+    // First, remove any displayed judgements that are no longer valid
+    const deleted: string[] = [];
+    for (const [uid, judgement] of Object.entries(displayedJudgements)) {
+      const originalJudgement = judgements[uid];
+      if (!originalJudgement || originalJudgement !== judgement) {
+        deleted.push(uid);
+      }
+      if (deleted.length) {
+        setDisplayedJudgement((prev) => {
+          const newDisplayed = update(prev, { $unset: deleted });
+          console.warn("DELETING DISPLAYED", newDisplayed);
+          return newDisplayed;
+        });
+      }
     }
-    return newObj;
-  }, [getPlayerNameFromUID]);
+  }, [displayedJudgements, judgements]);
 
   useEffect(() => {
     // Cancel any images that don't match the current prompt
@@ -87,7 +120,6 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
 
   // Judge when appropriate
   useEffect(() => {
-
     // Return if we already have all judgement data
     if (players.every((player) => Object.hasOwn(judgements, player.uid))) {
       return;
@@ -101,7 +133,10 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     const canceled = { current: false };
     (async () => {
       try {
-        const judgements = await stepTwo({ celebrity, metaprompt }, swapUIDForName(prompts));
+        const judgements = await stepTwo(
+          { celebrity, metaprompt },
+          swapUIDForName(prompts)
+        );
         if (canceled.current) {
           return;
         }
@@ -117,7 +152,16 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     return () => {
       canceled.current = true;
     };
-  }, [addJudgement, celebrity, judgements, metaprompt, players, prompts, UIDFromName, swapUIDForName]);
+  }, [
+    addJudgement,
+    celebrity,
+    judgements,
+    metaprompt,
+    players,
+    prompts,
+    UIDFromName,
+    swapUIDForName,
+  ]);
 
   // Choose winner when appropriate
   useEffect(() => {
@@ -143,11 +187,10 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
           return;
         }
 
-        // clear out the judgement history since we've gone through judging and have a winner
-        // TODO Russell - this doesn't seem to be enough, what am I missing to reset the winner and judgements on the host?
-        setDisplayedJudgement([]);
-
-        await addWinner({uid: UIDFromName(newWinner.name), message: newWinner.message});
+        await addWinner({
+          uid: UIDFromName(newWinner.name),
+          message: newWinner.message,
+        });
       } catch (error) {
         // TODO - error handling
         console.error("getting winner error:", error);
@@ -156,22 +199,34 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     return () => {
       canceled.current = true;
     };
-  }, [addWinner, celebrity, judgements, metaprompt, players, prompts, winner, UIDFromName, swapUIDForName]);
+  }, [
+    addWinner,
+    celebrity,
+    judgements,
+    metaprompt,
+    players,
+    prompts,
+    winner,
+    UIDFromName,
+    swapUIDForName,
+  ]);
 
   const nextJudgement = useMemo(() => {
-    const player = state.players.find((player) => {
-      return !displayedJudgements.includes(player.uid);
-    });
+    const player = state.players.find(
+      (player) => !Object.hasOwn(displayedJudgements, player.uid)
+    );
     if (!player) {
       return undefined;
     }
     return {
       player,
       markFinished: () => {
-        setDisplayedJudgement((prev) => [...prev, player.uid]);
+        setDisplayedJudgement((prev) =>
+          update(prev, { [player.uid]: { $set: judgements[player.uid] } })
+        );
       },
     };
-  }, [displayedJudgements, state.players]);
+  }, [displayedJudgements, judgements, state.players]);
   const viewState = useMemo(() => {
     return createViewState(state, nextJudgement);
   }, [state, nextJudgement]);

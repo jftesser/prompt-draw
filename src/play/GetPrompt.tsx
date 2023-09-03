@@ -1,6 +1,6 @@
 import { FC, FormEvent, useCallback, useState } from "react";
 import { GetPromptState } from "../game/PlayerState";
-import { Button } from '@chakra-ui/react';
+import { Button, Textarea, Heading, Text } from '@chakra-ui/react';
 
 const GetPrompt: FC<{ state: GetPromptState }> = ({ state }) => {
   const [prompt, setPrompt] = useState("");
@@ -14,17 +14,23 @@ const GetPrompt: FC<{ state: GetPromptState }> = ({ state }) => {
   );
   return (
     <div>
-      <span>{JSON.stringify(state)}</span>
-      <form className="prompt-form" onSubmit={onPrompt}>
-        <input
-          type="text"
-          placeholder="prompt"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          required
-        />
-        <Button type="submit">Set Prompt</Button>
-      </form>
+      <div>
+        <Heading>Your challenge:</Heading>
+        <Text>{state.metaprompt.metaprompt}</Text>
+      </div>
+
+      <div>
+        <Heading mt="1em">Your response:</Heading>
+        <form className="prompt-form" onSubmit={onPrompt}>
+          <Textarea
+            placeholder="your truly spectacular description of the perfect garment"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            required
+          />
+          <Button mt="1em" variant="outline" type="submit">Judge my creative soul</Button>
+        </form>
+      </div>
     </div>
   );
 };

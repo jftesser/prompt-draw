@@ -1,6 +1,7 @@
 import { FC, useEffect } from "react";
 import { IntroState } from "../game/State";
 import { stepOne } from "../gpt";
+import { Spinner, Text, Flex } from "@chakra-ui/react";
 
 const Intro: FC<{ state: IntroState }> = ({ state }) => {
   const moveToMetaprompt = state.moveToMetaprompt;
@@ -20,6 +21,9 @@ const Intro: FC<{ state: IntroState }> = ({ state }) => {
       canceled.current = true;
     };
   }, [moveToMetaprompt]);
-  return <div>{JSON.stringify(state)}</div>;
+  return <Flex direction="column" align="center">
+    <Spinner mb="1em" />
+    <Text>Your new client is contemplating their clothing desires...</Text>
+  </Flex>;
 };
 export default Intro;

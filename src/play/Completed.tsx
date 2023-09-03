@@ -1,6 +1,6 @@
 import { FC, useCallback } from "react";
 import { CompletedState } from "../game/PlayerState";
-import { Button } from '@chakra-ui/react';
+import { Button, Spinner, Text } from '@chakra-ui/react';
 
 const Completed: FC<{ state: CompletedState }> = ({ state }) => {
   const doRestartGame = state.controls?.restartGame;
@@ -10,11 +10,11 @@ const Completed: FC<{ state: CompletedState }> = ({ state }) => {
   if (doRestartGame) {
     return (
       <>
-        <div>{JSON.stringify(state)}</div>
-        <Button onClick={restartGame}>restart</Button>
+        <Text fontSize="2xl">Want to go again?</Text>
+        <Button mt="1em" variant='outline' onClick={restartGame}>restart</Button>
       </>
     );
   }
-  return <div>{JSON.stringify(state)}</div>;
+  return <><Spinner /><Text  mt="1em" fontSize="2xl">Want to play again? Ask <strong>{state.otherPlayers[0].name}</strong> to restart the game.</Text></>;
 };
 export default Completed;

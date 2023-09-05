@@ -4,7 +4,7 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   GoogleAuthProvider,
-  signInWithRedirect,
+  signInWithPopup,
 } from "firebase/auth";
 import {
   getFunctions,
@@ -38,7 +38,7 @@ export const signIn = (email: string, password: string) => {
 };
 
 export const signInWithGoogle = (): void => {
-  signInWithRedirect(auth, provider);
+  signInWithPopup(auth, provider);
 };
 
 export const database = getDatabase(firebaseApp);

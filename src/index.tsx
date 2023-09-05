@@ -12,16 +12,15 @@ import LoginPage from "./Login";
 import Content from "./Content";
 import Host from "./host/";
 import Play from "./play/";
-import Demo from "./Demo";
-import { ChakraProvider } from '@chakra-ui/react';
-import { extendTheme } from '@chakra-ui/react';
+import { ChakraProvider } from "@chakra-ui/react";
+import { extendTheme } from "@chakra-ui/react";
 
 const theme = extendTheme({
   fonts: {
     heading: `'Rubik 80s Fade', cursive`,
     body: `'Rubik', sans-serif`,
   },
-})
+});
 
 const LoginAndRerouteToRoot = () => {
   const navigate = useNavigate();
@@ -43,10 +42,6 @@ const router = createBrowserRouter([
   {
     path: "play/:gameId",
     element: <ProtectedRoute outlet={<Play />} />,
-  },
-  {
-    path: "demo",
-    element: <ProtectedRoute outlet={<Demo />} />,
   },
   {
     path: "login",

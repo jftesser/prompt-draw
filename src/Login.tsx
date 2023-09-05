@@ -1,7 +1,7 @@
 import React, { FormEvent, useState } from "react";
-import { signIn } from "./firebase/firebaseSetup";
+import { signIn, signInWithGoogle } from "./firebase/firebaseSetup";
 import "./Login.scss";
-import { Input, Button } from '@chakra-ui/react';
+import { Input, Button, Flex, Divider } from "@chakra-ui/react";
 
 interface LoginPageProps {
   onLogin?: () => void;
@@ -26,23 +26,33 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     <div className="login">
       <div>
         <h1>Login</h1>
-        <form className="login-form" onSubmit={handleLogin}>
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <Button type="submit">Login</Button>
-        </form>
+        <Flex align="center">
+          <form className="login-form" onSubmit={handleLogin}>
+            <Input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <Input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <Button type="submit">Login</Button>
+          </form>
+          <Divider orientation="vertical" ml="2em" mr="2em" />
+          <Button
+            onClick={() => {
+              signInWithGoogle();
+            }}
+          >
+            Login with Google
+          </Button>
+        </Flex>
         {error && <p>{error}</p>}
       </div>
     </div>

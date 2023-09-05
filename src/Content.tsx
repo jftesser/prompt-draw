@@ -2,7 +2,7 @@ import { FC, FormEvent, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Content.scss";
 import makeNewGame from "./makeNewGame";
-import { auth, database } from "./firebase/firebaseSetup";
+import { auth, database, signOut } from "./firebase/firebaseSetup";
 import joinGame from "./joinGame";
 import { Input, Button, Heading, Text, Flex, Divider } from "@chakra-ui/react";
 import { get, ref } from "firebase/database";
@@ -105,27 +105,35 @@ const Content: FC = () => {
             Join Game
           </Button>
         </form>
-        <Divider orientation="vertical" ml="2em" mr="2em" />
 
         {hoster ? (
-          <Button mt="0.5em" mb="0.5em" variant="outline" onClick={onMakeGame}>
-            Host
-          </Button>
+          <>
+            <Divider orientation="vertical" ml="2em" mr="2em" />
+            <Button
+              mt="0.5em"
+              mb="0.5em"
+              variant="outline"
+              onClick={onMakeGame}
+            >
+              Host
+            </Button>
+          </>
         ) : (
           <></>
         )}
-      </Flex>
+        <Divider orientation="vertical" ml="2em" mr="2em" />
 
-      <div>
         <Button
-          variant="link"
+          mt="0.5em"
+          mb="0.5em"
+          variant="outline"
           onClick={() => {
-            navigate("/demo");
+            signOut();
           }}
         >
-          Demo
+          Log out
         </Button>
-      </div>
+      </Flex>
     </div>
   );
 };

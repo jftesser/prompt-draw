@@ -3,6 +3,8 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  GoogleAuthProvider,
+  signInWithRedirect,
 } from "firebase/auth";
 import {
   getFunctions,
@@ -13,7 +15,7 @@ import { firebaseConfig } from "./creds";
 import { getDatabase } from "firebase/database";
 
 const firebaseApp = initializeApp(firebaseConfig);
-
+const provider = new GoogleAuthProvider();
 export const auth = getAuth(firebaseApp);
 export const functions = getFunctions(firebaseApp);
 //connectFunctionsEmulator(functions, "localhost", 5001);
@@ -33,6 +35,10 @@ export const signIn = (email: string, password: string) => {
     .catch((error) => {
       return error;
     });
+};
+
+export const signInWithGoogle = (): void => {
+  signInWithRedirect(auth, provider);
 };
 
 export const database = getDatabase(firebaseApp);

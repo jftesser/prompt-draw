@@ -10,7 +10,7 @@ const Judging: FC<{ state: JudgingState }> = ({ state }) => {
       <Heading size="4xl" mb="0.5em" alignSelf="start">{state.player}'s design</Heading>
       <Flex>
         {state.image.status === "image" ?
-          <Image src={state.image.url} alt="prompt response" /> : <div className="host-maingame-judging-censored">CENSORED</div>}
+          <Image src={state.image.url} boxSize="512px" alt="prompt response" /> : <div className="host-maingame-judging-censored">CENSORED</div>}
         <Text ml="2em" fontSize="2xl">{state.judgement}</Text>
       </Flex>
       <Button size="xl" alignSelf="end" variant="link" onClick={() => state.markFinished()}><ArrowForwardIcon boxSize={10} /></Button>

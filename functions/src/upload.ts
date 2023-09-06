@@ -13,10 +13,10 @@ initializeApp({
     storageBucket: "prompt-draw.appspot.com"
   });
 
-export const uploadImage = async (imageBytes64Str: string, name: string) => {
+export const uploadImage = async (imageBase64Str: string, name: string) => {
 
     const bucket = getStorage().bucket()
-    const imageBuffer = Buffer.from(imageBytes64Str, 'base64')
+    const imageBuffer = Buffer.from(imageBase64Str, 'base64')
     //const imageByteArray = new Uint8Array(imageBuffer);
     const file = bucket.file(`${name}.png`);
     const options = { resumable: false, metadata: { contentType: "image/png" } }

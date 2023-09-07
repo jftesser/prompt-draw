@@ -36,7 +36,7 @@ export const extractJSON = (str: string) => {
             candidate = str.substring(firstOpen, firstClose + 1);
             console.log('candidate: ' + candidate);
             try {
-                const res = JSON.parse(candidate);
+                const res = JSON.parse(candidate) as unknown;
                 console.log('...found');
                 return res;
             }

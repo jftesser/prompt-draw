@@ -45,24 +45,30 @@ Think about the garments you’ve seen, which one best fulfills your brief and m
 You will be prompted to complete each step, one at a time.
 `;
 
-// TODO Russell - I think this messes with your parsing stuff, so maybe you can rewrite?
-const fixKeyCase = (refObj: { [name: string]: string }, transObj: { [name: string]: string }) => {
-    const refKeys = Object.keys(refObj);
-    const newObj: { [name: string]: any } = {};
-    for (const [transName, value] of Object.entries(transObj)) {
-        const refName = refKeys.find((name) => name.toLowerCase() === transName.toLowerCase());
-        if (refName) {
-            newObj[refName] = value;
-        }
+// don't consider case or trailing or leading whitespace for the purposes of matching gpt output
+const fuzzyMatch = (a: string, b: string): boolean =>
+  a.toLowerCase().trim() === b.toLowerCase().trim();
+
+const fixKeyCase = (
+  refObj: { [name: string]: string },
+  transObj: { [name: string]: string }
+) => {
+  const refKeys = Object.keys(refObj);
+  const newObj: { [name: string]: any } = {};
+  for (const [transName, value] of Object.entries(transObj)) {
+    const refName = refKeys.find((name) => fuzzyMatch(name, transName));
+    if (refName) {
+      newObj[refName] = value;
     }
-    return newObj;
+  }
+  return newObj;
 };
 
 const fixCase = (refObj: { [name: string]: string }, transName: string) => {
-    const refKeys = Object.keys(refObj);
-    const refName = refKeys.find((name) => name.toLowerCase() === transName.toLowerCase());
-    if (refName) return refName;
-    return transName;
+  const refKeys = Object.keys(refObj);
+  const refName = refKeys.find((name) => fuzzyMatch(name, transName));
+  if (refName) return refName;
+  return transName;
 };
 
 const getMessagesStepOne = (): Message[] => {
@@ -153,7 +159,7 @@ export const stepTwo = async (
   metaprompt: Metaprompt,
   prompts: { [name: string]: string }
 ): Promise<StepTwoData> => {
-  const raw = fixKeyCase(prompts, await getObject(getMessagesStepTwo(metaprompt, prompts)));
+  const raw = await getObject(getMessagesStepTwo(metaprompt, prompts));
   // TODO - try again on failure?
   const parsed = match(
     () => {
@@ -161,10 +167,12 @@ export const stepTwo = async (
     },
     (d: StepTwoData) => d
   )(StepTwoCodec.decode(raw));
-  if (Object.keys(prompts).some((name) => !Object.hasOwn(parsed, name))) {
+  const fixed = fixKeyCase(prompts, parsed);
+
+  if (Object.keys(prompts).some((name) => !Object.hasOwn(fixed, name))) {
     throw new Error("Invalid Response");
   }
-  return parsed;
+  return fixed;
 };
 
 const StepThreeCodec = t.type({
@@ -176,7 +184,7 @@ export const stepThree = async (
   metaprompt: Metaprompt,
   prompts: { [name: string]: string },
   judgements: { [name: string]: string }
-): Promise<{name: string, message: string}> => {
+): Promise<{ name: string; message: string }> => {
   // TODO - try again on failure?
   const raw = await getObject(
     getMessagesStepThree(metaprompt, prompts, judgements)
@@ -203,6 +211,7 @@ export const stepThree = async (
 
 export const getImageURL = async (prompt: string, celebrity: string) => {
   const fullPrompt = `Full body red carpet photo of ${celebrity} wearing ${prompt}`;
-  const urls = (await getImage({ prompt: fullPrompt, count: 1 })).data as string[];
+  const urls = (await getImage({ prompt: fullPrompt, count: 1 }))
+    .data as string[];
   return urls[0];
 };

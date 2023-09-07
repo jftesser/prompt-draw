@@ -61,7 +61,7 @@ const Content: FC = () => {
           if (!auth.currentUser) {
             throw new Error("Not logged in");
           }
-          await joinGame(gameId, auth.currentUser.uid, playerName);
+          await joinGame(gameId, auth.currentUser.uid, playerName.trim());
 
           navigate(`/play/${gameId}`);
         } catch (e) {

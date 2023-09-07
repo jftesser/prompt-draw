@@ -325,6 +325,8 @@ const useStateFromDatabase = (
           ...common,
           stage: "completed",
           winner: winnerPlayer,
+          prompts: prompts ?? {},
+          images: images ?? {},
           restartGame,
         },
       };

@@ -1,0 +1,11 @@
+.image-display {
+    &:hover {
+        .caption {
+            display: block;
+        }
+    }
+    cursor:zoom-in;
+    .caption {
+        display: none;
+    }
+}

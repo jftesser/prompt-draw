@@ -37,11 +37,13 @@ export const createViewState = (
 
     // Note - we checked above that all players have a judgement and image
     const image = state.images[nextJudgement.player.uid];
+    const prompt = state.prompts[nextJudgement.player.uid];
     const judgement = state.judgements[nextJudgement.player.uid];
     return {
       stage: "judging",
       player: nextJudgement.player.name,
       image,
+      prompt,
       judgement,
       markFinished: nextJudgement.markFinished,
     };
@@ -65,6 +67,7 @@ export const createViewState = (
     winner: winnerPlayer.name,
     message: winner.message,
     image: state.images[winner.uid],
+    prompt: state.prompts[winner.uid],
     markCompleted: state.markCompleted,
   };
 };

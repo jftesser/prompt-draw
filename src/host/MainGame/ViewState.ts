@@ -14,6 +14,7 @@ export type JudgingState = {
   player: string;
   judgement: string;
   image: Image;
+  prompt: string;
   markFinished: () => void;
 };
 
@@ -22,6 +23,7 @@ export type WinnerRevealState = {
   winner: string;
   message: string;
   image: Image;
+  prompt: string;
   markCompleted: () => void;
 };
 

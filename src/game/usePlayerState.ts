@@ -44,6 +44,17 @@ const getOtherPlayers = (
   return otherPlayers;
 };
 
+const getSelf = (
+  players: Player[],
+  uid: string
+): Player | undefined => {
+  const selves = players.filter((player) => player.uid === uid);
+  if (selves.length < 1) {
+    return undefined;
+  }
+  return selves[0];
+};
+
 export const playerLobbyFromLobby = (
   state: LobbyState,
   uid: string
@@ -51,6 +62,10 @@ export const playerLobbyFromLobby = (
   const otherPlayers = getOtherPlayers(state.players, uid);
   if (otherPlayers === undefined) {
     return { status: "error", error: "Player not found" };
+  }
+  const self = getSelf(state.players, uid);
+  if (self === undefined) {
+    return { status: "error", error: "Self not found" };
   }
   if (state.players[0]?.uid === uid) {
     const controls = otherPlayers.length
@@ -62,7 +77,7 @@ export const playerLobbyFromLobby = (
       status: "state",
       state: {
         stage: "lobby",
-        uid,
+        self,
         otherPlayers,
         gameId: state.gameId,
         controls,
@@ -71,7 +86,7 @@ export const playerLobbyFromLobby = (
   } else {
     return {
       status: "state",
-      state: { stage: "lobby", uid, otherPlayers, gameId: state.gameId },
+      state: { stage: "lobby", self, otherPlayers, gameId: state.gameId },
     };
   }
 };
@@ -84,9 +99,13 @@ const playerIntroFromIntro = (
   if (otherPlayers === undefined) {
     return { status: "error", error: "Player not found" };
   }
+  const self = getSelf(state.players, uid);
+  if (self === undefined) {
+    return { status: "error", error: "Self not found" };
+  }
   return {
     status: "state",
-    state: { stage: "intro", uid, otherPlayers, gameId: state.gameId },
+    state: { stage: "intro", self, otherPlayers, gameId: state.gameId },
   };
 };
 
@@ -100,7 +119,11 @@ const getPlayerStateFromMainGameState = (
   if (otherPlayers === undefined) {
     return { status: "error", error: "Player not found" };
   }
-  const common = { uid, otherPlayers, gameId: state.gameId };
+  const self = getSelf(state.players, uid);
+  if (self === undefined) {
+    return { status: "error", error: "Self not found" };
+  }
+  const common = { self, otherPlayers, gameId: state.gameId };
   if (Object.hasOwn(state.prompts, uid)) {
     return otherPlayers.every((player) =>
       Object.hasOwn(state.prompts, player.uid)
@@ -141,6 +164,10 @@ const playerCompletedFromCompleted = (
   if (otherPlayers === undefined) {
     return { status: "error", error: "Player not found" };
   }
+  const self = getSelf(state.players, uid);
+  if (self === undefined) {
+    return { status: "error", error: "Self not found" };
+  }
 
   if (state.players[0]?.uid === uid) {
     const controls = otherPlayers.length
@@ -152,7 +179,7 @@ const playerCompletedFromCompleted = (
       status: "state",
       state: {
         stage: "completed",
-        uid,
+        self,
         otherPlayers,
         gameId: state.gameId,
         winner: state.winner,
@@ -164,7 +191,7 @@ const playerCompletedFromCompleted = (
       status: "state",
       state: {
         stage: "completed",
-        uid,
+        self,
         otherPlayers,
         gameId: state.gameId,
         winner: state.winner,

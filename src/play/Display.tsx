@@ -9,6 +9,7 @@ import Completed from "./Completed";
 import WaitingForOtherPlayers from "./WaitingForOtherPlayers";
 import GetPrompt from "./GetPrompt";
 import Endgame from "./Endgame";
+import { Text } from "@chakra-ui/react";
 
 const Display: FC<{ state: PlayerState }> = ({ state }) => {
   const chooseState = useCallback(() => {
@@ -33,6 +34,7 @@ const Display: FC<{ state: PlayerState }> = ({ state }) => {
     return unreachable(state);
   }, [state]);
   return (<div className="full">
+    <Text pos="fixed" right="0" top="0" fontSize="xl" p="1em">You are <strong>{state.self.name}.</strong></Text>
     {chooseState()}
   </div>);
 };

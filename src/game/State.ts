@@ -73,6 +73,8 @@ export type MainGameState = CommonStartedState & {
 export type CompletedState = CommonStartedState & {
   stage: "completed";
   winner: Player;
+  prompts: { [uid: string]: string };
+  images: { [uid: string]: Image };
   restartGame: () => Promise<void>;
 };
 

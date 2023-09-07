@@ -3,8 +3,7 @@ import { Metaprompt, Player } from "./State";
 export type CommonState = {
   otherPlayers: Player[];
   gameId: string;
-  // TODO: make this a Player so we can display your name to you in case you forget
-  uid: string;
+  self: Player;
 };
 
 export type LobbyControls = {

@@ -22,7 +22,7 @@ const Lobby: FC<{ state: LobbyState }> = ({ state }) => {
     );
   }
   return <>
-    {state.otherPlayers.length ? <><Spinner size="xl" mb="1em"/><Text fontSize="2xl">Waiting for <strong>{state.otherPlayers[0].name}</strong> to start the game</Text></> : <Text>Waiting to start...</Text>}
+    {state.otherPlayers.length ? <><Spinner size="xl" mb="1em"/><Text fontSize="2xl">Waiting for <strong>{state.otherPlayers[0].name}</strong> to start the game</Text></> : <Text fontSize="2xl">Waiting to start...</Text>}
   </>;
 };
 export default Lobby;

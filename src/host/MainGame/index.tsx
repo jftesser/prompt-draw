@@ -4,6 +4,7 @@ import Display from "./Display";
 import createViewState from "./createViewState";
 import { getImageURL, stepTwo, stepThree } from "../../gpt";
 import update from "immutability-helper";
+import { swapUIDForName } from "../../Utils";
 
 const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
   const [displayedJudgements, setDisplayedJudgement] = useState<{
@@ -24,35 +25,6 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     addWinner,
     metaprompt: { celebrity, metaprompt },
   } = state;
-
-  const getPlayerNameFromUID = useCallback(
-    (uid: string) => {
-      const player = players.find((player) => player.uid === uid);
-      if (!player) return "Unknown Player";
-      return player.name;
-    },
-    [players]
-  );
-
-  const UIDFromName = useCallback(
-    (name: string) => {
-      const player = players.find((player) => player.name === name);
-      if (!player) return "undefined";
-      return player.uid;
-    },
-    [players]
-  );
-
-  const swapUIDForName = useCallback(
-    (obj: { [uid: string]: any }) => {
-      const newObj: { [name: string]: any } = {};
-      for (const [uid, value] of Object.entries(obj)) {
-        newObj[getPlayerNameFromUID(uid)] = value;
-      }
-      return newObj;
-    },
-    [getPlayerNameFromUID]
-  );
 
   // Clear out any displayed prompts which are no longer valid.
   useEffect(() => {
@@ -131,13 +103,13 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
       try {
         const judgements = await stepTwo(
           { celebrity, metaprompt },
-          swapUIDForName(prompts)
+          prompts
         );
         if (canceled.current) {
           return;
         }
-        for (const [name, judgement] of Object.entries(judgements)) {
-          addJudgement(UIDFromName(name), judgement);
+        for (const [uid, judgement] of Object.entries(judgements)) {
+          addJudgement(uid, swapUIDForName(judgement, players));
         }
       } catch (error) {
         // TODO - error handling
@@ -154,9 +126,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     judgements,
     metaprompt,
     players,
-    prompts,
-    UIDFromName,
-    swapUIDForName,
+    prompts
   ]);
 
   // Choose winner when appropriate
@@ -176,16 +146,16 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
       try {
         const newWinner = await stepThree(
           { celebrity, metaprompt },
-          swapUIDForName(prompts),
-          swapUIDForName(judgements)
+          prompts,
+          judgements
         );
         if (canceled.current) {
           return;
         }
 
         await addWinner({
-          uid: UIDFromName(newWinner.name),
-          message: newWinner.message,
+          uid: newWinner.uid,
+          message: swapUIDForName(newWinner.message, players),
         });
       } catch (error) {
         // TODO - error handling
@@ -203,8 +173,6 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     players,
     prompts,
     winner,
-    UIDFromName,
-    swapUIDForName,
   ]);
 
   const nextJudgement = useMemo(() => {

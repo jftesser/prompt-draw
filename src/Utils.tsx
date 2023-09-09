@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { Player } from "./game/State";
 
 export const ScrollToTop = () => {
     const { pathname, hash, key } = useLocation();
@@ -50,3 +51,10 @@ export const extractJSON = (str: string) => {
 }
 
 export const unreachable = (x: never): any => {};
+
+export const swapUIDForName = (text: string, players: Player[]) => {
+    for (const player of players) {
+        text = text.replace(new RegExp(player.uid, 'g'), player.name);
+    }
+    return text;
+};

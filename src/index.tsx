@@ -12,7 +12,7 @@ import LoginPage from "./Login";
 import Content from "./Content";
 import Host from "./host/";
 import Play from "./play/";
-import { extendTheme, withDefaultColorScheme, baseTheme, ColorModeScript, ChakraProvider } from "@chakra-ui/react";
+import { extendTheme, ChakraProvider } from "@chakra-ui/react";
 import { mode } from "@chakra-ui/theme-tools";
 
 const theme = extendTheme({

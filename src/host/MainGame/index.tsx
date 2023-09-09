@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { MainGameState } from "../../game/State";
 import Display from "./Display";
 import createViewState from "./createViewState";

@@ -4,7 +4,7 @@ import { Heading, Text, Flex } from '@chakra-ui/react';
 
 const Lobby: FC<{ state: LobbyState }> = ({ state }) => {
   return <>
-    <Heading as='h1' size='4xl'>Welcome!</Heading>
+    <Heading as='h1' fontSize={["4em", "6em", "10em"]} lineHeight="0.8">Welcome!</Heading>
     <Text fontSize="6xl">Room code: <strong>{state.gameId}</strong></Text>
     {state.players.length > 0 && <Text fontSize="2xl">Check out who's here:</Text>}
     {state.players.map((player) => {

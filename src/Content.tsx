@@ -75,40 +75,57 @@ const Content: FC = () => {
     <></>
   ) : (
     <div className="full">
-      <div>
-        <Text>Prompt Draw</Text>
-        <Heading as="h1" size="4xl">
-          Fashion Frenzy
-        </Heading>
-      </div>
-      <Flex align="center">
-        <form className="join-game-form" onSubmit={onJoinGame}>
-          <Input
-            mt="0.5em"
-            mb="0.5em"
-            type="text"
-            placeholder="game code"
-            value={gameId}
-            onChange={(e) => setGameId(e.target.value)}
-            required
-          />
-          <Input
-            mt="0.5em"
-            mb="0.5em"
-            type="text"
-            placeholder="your name"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            required
-          />
-          <Button mt="0.5em" mb="0.5em" variant="outline" type="submit">
-            Join Game
-          </Button>
-        </form>
+      <div className="container">
+        <div>
+          <Text>Prompt Draw</Text>
+          <Heading as="h1" fontSize={["4em", "6em", "10em"]} lineHeight="0.8">
+            Fashion Frenzy
+          </Heading>
+        </div>
+        <Divider orientation="horizontal" mt="2em" />
+        <Flex align="center">
+          <form className="join-game-form" onSubmit={onJoinGame}>
+            <Input
+              mt="2em"
+              mb="0.5em"
+              type="text"
+              placeholder="game code"
+              value={gameId}
+              onChange={(e) => setGameId(e.target.value)}
+              required
+            />
+            <Input
+              mt="0.5em"
+              mb="0.5em"
+              type="text"
+              placeholder="your name"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              required
+            />
+            <Button mt="0.5em" mb="2em" variant="outline" type="submit">
+              Join Game
+            </Button>
+          </form>
 
+          <Divider orientation="vertical" ml="2em" mr="2em" />
+
+          <Button
+            mt="0.5em"
+            mb="0.5em"
+            minW="5em"
+            variant="outline"
+            onClick={() => {
+              signOut();
+            }}
+          >
+            Log out
+          </Button>
+
+        </Flex>
         {hoster ? (
           <>
-            <Divider orientation="vertical" ml="2em" mr="2em" />
+            <Divider orientation="horizontal" mb="2em" />
             <Button
               mt="0.5em"
               mb="0.5em"
@@ -121,19 +138,7 @@ const Content: FC = () => {
         ) : (
           <></>
         )}
-        <Divider orientation="vertical" ml="2em" mr="2em" />
-
-        <Button
-          mt="0.5em"
-          mb="0.5em"
-          variant="outline"
-          onClick={() => {
-            signOut();
-          }}
-        >
-          Log out
-        </Button>
-      </Flex>
+      </div>
     </div>
   );
 };

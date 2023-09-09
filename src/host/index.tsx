@@ -40,7 +40,11 @@ export const Host: FC = () => {
   }
 
   if (state.status === "error") {
-    return <div className="full"><span>Error! {state.error}</span></div>;
+    return <div className="full">
+      <div className="container">
+        <span>Error! {state.error}</span>
+      </div>
+    </div>;
   }
 
   return <Display state={state.state} />;

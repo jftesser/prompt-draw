@@ -39,11 +39,19 @@ export const Play: FC = () => {
   const state = usePlayerState(params.gameId, authContext.user?.uid);
 
   if (state === undefined) {
-    return <div className="full"><span>Loading...</span></div>;
+    return <div className="full">
+      <div className="container">
+        <span>Loading...</span>
+      </div>
+    </div>;
   }
 
   if (state.status === "error") {
-    return <div className="full"><span>Error! {state.error}</span></div>;
+    return <div className="full">
+      <div className="container">
+        <span>Error! {state.error}</span>
+      </div>
+    </div>;
   }
 
   return <Display state={state.state} />;

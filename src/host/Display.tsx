@@ -9,7 +9,7 @@ import MainGame from "./MainGame";
 import Completed from "./Completed";
 
 const Display: FC<{ state: State }> = ({ state }) => {
-  const chooseState = useCallback( () => {
+  const chooseState = useCallback(() => {
     if (state.stage === "lobby") {
       return <Lobby state={state} />;
     }
@@ -22,12 +22,14 @@ const Display: FC<{ state: State }> = ({ state }) => {
     if (state.stage === "completed") {
       return <Completed state={state} />;
     }
-  
+
     return unreachable(state);
   }, [state]);
 
   return (<div className="full">
-    {chooseState()}
+    <div className="container">
+      {chooseState()}
+    </div>
   </div>);
 };
 

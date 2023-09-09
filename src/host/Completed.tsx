@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { CompletedState } from "../game/State";
-import { Heading, Text, Box } from '@chakra-ui/react';
+import { Heading, Text, Box, Card } from '@chakra-ui/react';
 import ImageDisplay from "./ImageDisplay";
 
 const Completed: FC<{ state: CompletedState }> = ({ state }) => {
@@ -9,20 +9,21 @@ const Completed: FC<{ state: CompletedState }> = ({ state }) => {
   });
 
   const renderImage = (image: any, prompt: string, name: string) => {
-    return <Box key={name} display="flex" flexDirection="column" alignItems="center" p="1em"><Text fontSize="2xl">{name}</Text>
-    <ImageDisplay image={image} prompt={prompt} sz="25vh" />
-    </Box>;
+    return <Card key={name} m="1em" display="flex" flexDirection="column" alignItems="center" p="1em" background="white">
+      <ImageDisplay image={image} prompt={prompt} sz="25vh" />
+      <Text fontSize="2xl" color="black">{name}</Text>
+    </Card>;
   };
 
   return <>
   <Box display="flex">{imgData.slice(0, Math.floor(imgData.length*0.5)).map((img) => {
     return renderImage(img.image, img.prompt, img.name);
   })}</Box>
-  <Heading size="4xl" mb="0.5em">That's all folks!</Heading>
+  <Heading fontSize={["4em", "6em"]} mb="0.5em" mt="0.5em" lineHeight="0.8">That's all folks!</Heading>
   <Text fontSize="2xl">Congrats to {state.winner.name}! You did slightly better than everyone else. Don't forget, though, there's room for improvement.</Text>
-  {imgData.slice(Math.floor(imgData.length*0.5)).map((img) => {
+  <Box display="flex">{imgData.slice(Math.floor(imgData.length*0.5)).map((img) => {
     return renderImage(img.image, img.prompt, img.name);
-  })}
+  })}</Box>
   </>;
 };
 export default Completed;

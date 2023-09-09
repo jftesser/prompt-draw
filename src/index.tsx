@@ -12,13 +12,24 @@ import LoginPage from "./Login";
 import Content from "./Content";
 import Host from "./host/";
 import Play from "./play/";
-import { ChakraProvider } from "@chakra-ui/react";
-import { extendTheme } from "@chakra-ui/react";
+import { extendTheme, withDefaultColorScheme, baseTheme, ColorModeScript, ChakraProvider } from "@chakra-ui/react";
+import { mode } from "@chakra-ui/theme-tools";
 
 const theme = extendTheme({
+  initialColorMode: 'dark',
+
+  useSystemColorMode: false,
   fonts: {
     heading: `'Rubik 80s Fade', cursive`,
     body: `'Rubik', sans-serif`,
+
+  },
+  styles: {
+    global: (props: any) => ({
+      "html, body": {
+        background: mode("white", "black")(props),
+      },
+    }),
   },
 });
 
@@ -52,6 +63,9 @@ const router = createBrowserRouter([
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
+
+// know bug in chakra ui
+{localStorage.setItem('chakra-ui-color-mode', 'dark')}
 
 root.render(
   <React.StrictMode>

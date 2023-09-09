@@ -15,12 +15,12 @@ const GetPrompt: FC<{ state: GetPromptState }> = ({ state }) => {
   return (
     <div>
       <div>
-        <Heading>Your challenge:</Heading>
-        <Text>{state.metaprompt.metaprompt}</Text>
+        <Heading fontSize={["4em", "6em"]} lineHeight="0.8" mb="1rem">Your challenge:</Heading>
+        <Text fontSize={["1em", "2em"]}>{state.metaprompt.metaprompt}</Text>
       </div>
 
       <div>
-        <Heading mt="1em">Your response:</Heading>
+        <Heading fontSize={["4em", "6em"]} lineHeight="0.8" mt="1em" mb="1rem">Your response:</Heading>
         <form className="prompt-form" onSubmit={onPrompt}>
           <Textarea
             placeholder="your truly spectacular description of the perfect garment"

@@ -17,7 +17,7 @@ const Lobby: FC<{ state: LobbyState }> = ({ state }) => {
               return <Text key={player.uid} fontSize="2xl" fontWeight="bold">{player.name}</Text>;
             })}
           </>}
-        <Button mt="1em" variant='outline' onClick={startGame}>let's get started</Button>
+        <Button mt="1em" variant='outline' onClick={startGame}>Let's get started</Button>
       </>
     );
   }

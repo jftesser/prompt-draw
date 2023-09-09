@@ -7,7 +7,7 @@ import ImageDisplay from "../ImageDisplay";
 const WinnerReveal: FC<{ state: WinnerRevealState }> = ({ state }) => {
   return (
     <>
-      <Heading size="4xl" mb="0.5em" alignSelf="start">The winner is {state.winner}</Heading>
+      <Heading fontSize={["4em", "6em"]} lineHeight="0.8" mb="0.5em" alignSelf="start">The winner is {state.winner}</Heading>
       <Flex>
         <ImageDisplay image={state.image} prompt={state.prompt} sz="512px" />
         <Text width="50%" ml="2em" fontSize="2xl">{state.message}</Text>

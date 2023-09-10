@@ -1,6 +1,7 @@
 import { FC, FormEvent, useCallback, useState } from "react";
 import { GetPromptState } from "../game/PlayerState";
 import { Button, Textarea, Heading, Text } from '@chakra-ui/react';
+import Timer from "../Timer";
 
 const GetPrompt: FC<{ state: GetPromptState }> = ({ state }) => {
   const [prompt, setPrompt] = useState("");
@@ -12,8 +13,13 @@ const GetPrompt: FC<{ state: GetPromptState }> = ({ state }) => {
     },
     [prompt, getPrompt]
   );
+  
+  const time = new Date();
+  time.setSeconds(time.getSeconds() + 120);
+
   return (
     <div>
+      <Timer expiryTimestamp={time} callback={() => { getPrompt("a clown suit")}}/>
       <div>
         <Heading fontSize={["4em", "6em"]} lineHeight="0.8" mb="1rem">Your challenge:</Heading>
         <Text fontSize={["1em", "2em"]}>{state.metaprompt.metaprompt}</Text>

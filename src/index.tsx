@@ -31,6 +31,15 @@ const theme = extendTheme({
       },
     }),
   },
+  components: {
+    Progress: {
+      baseStyle: {
+        filledTrack: {
+          bg: '#fff'
+        }
+      }
+    }
+  }
 });
 
 const LoginAndRerouteToRoot = () => {

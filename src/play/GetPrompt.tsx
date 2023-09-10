@@ -1,6 +1,6 @@
 import { FC, FormEvent, useCallback, useState } from "react";
 import { GetPromptState } from "../game/PlayerState";
-import { Button, Textarea, Heading, Text } from '@chakra-ui/react';
+import { Button, Textarea, Heading, Text, Box } from '@chakra-ui/react';
 import Timer from "../Timer";
 
 const GetPrompt: FC<{ state: GetPromptState }> = ({ state }) => {
@@ -19,7 +19,7 @@ const GetPrompt: FC<{ state: GetPromptState }> = ({ state }) => {
 
   return (
     <div>
-      <Timer expiryTimestamp={time} callback={() => { getPrompt("a clown suit")}}/>
+      
       <div>
         <Heading fontSize={["4em", "6em"]} lineHeight="0.8" mb="1rem">Your challenge:</Heading>
         <Text fontSize={["1em", "2em"]}>{state.metaprompt.metaprompt}</Text>
@@ -27,6 +27,10 @@ const GetPrompt: FC<{ state: GetPromptState }> = ({ state }) => {
 
       <div>
         <Heading fontSize={["4em", "6em"]} lineHeight="0.8" mt="1em" mb="1rem">Your response:</Heading>
+        <Box mb="1em">
+        <Text fontSize={["1em", "2em"]}>You have two minutes! Tick. Tock.</Text>
+        <Timer expiryTimestamp={time} callback={() => { getPrompt("a clown suit")}}/>
+        </Box>
         <form className="prompt-form" onSubmit={onPrompt}>
           <Textarea
             placeholder="your truly spectacular description of the perfect garment"

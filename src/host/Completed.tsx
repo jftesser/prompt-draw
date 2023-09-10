@@ -2,6 +2,7 @@ import { FC } from "react";
 import { CompletedState } from "../game/State";
 import { Heading, Text, Box, Card } from '@chakra-ui/react';
 import ImageDisplay from "./ImageDisplay";
+import "./Completed.scss";
 
 const Completed: FC<{ state: CompletedState }> = ({ state }) => {
   const imgData = Object.entries(state.images).map(([uid, image]) => {
@@ -9,9 +10,11 @@ const Completed: FC<{ state: CompletedState }> = ({ state }) => {
   });
 
   const renderImage = (image: any, prompt: string, name: string) => {
-    return <Card key={name} m="1em" display="flex" flexDirection="column" alignItems="center" p="1em" background="white">
+    const isTheWinner = state.winner.name === name;
+    return <Card position="relative" key={name} m="1em" display="flex" flexDirection="column" alignItems="center" p="1em" background="white">
+      {isTheWinner && <div className="star">★</div>}
       <ImageDisplay image={image} prompt={prompt} sz="25vh" />
-      <Text fontSize="2xl" color="black">{name}</Text>
+      <Text fontSize="2xl" color="black" fontFamily='Covered By Your Grace'>{name}</Text>
     </Card>;
   };
 

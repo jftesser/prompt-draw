@@ -29,7 +29,7 @@ const GetPrompt: FC<{ state: GetPromptState }> = ({ state }) => {
         <Heading fontSize={["4em", "6em"]} lineHeight="0.8" mt="1em" mb="1rem">Your response:</Heading>
         <Box mb="1em">
         <Text fontSize={["1em", "2em"]}>You have two minutes! Tick. Tock.</Text>
-        <Timer expiryTimestamp={time} callback={() => { getPrompt("a clown suit")}}/>
+        <Timer expiryTimestamp={time} callback={() => { getPrompt(prompt.length ? prompt : "a clown suit")}}/>
         </Box>
         <form className="prompt-form" onSubmit={onPrompt}>
           <Textarea

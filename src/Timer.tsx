@@ -1,17 +1,15 @@
-import { FC, useState, useEffect } from 'react';
+import { FC } from 'react';
 import { useTimer } from 'react-timer-hook';
 import { Progress, Text, Flex } from '@chakra-ui/react';
 
-const Timer: FC<{ expiryTimestamp: Date, callback: () => void }> = ({ expiryTimestamp, callback }) => {
+const Timer: FC<{ currentTimestamp: Date, expiryTimestamp: Date, callback: () => void }> = ({ currentTimestamp, expiryTimestamp, callback }) => {
     const {
         totalSeconds,
         seconds,
         minutes,
     } = useTimer({ expiryTimestamp, onExpire: () => callback() });
-    const [duration, setDuration] = useState<number>(totalSeconds);
-    useEffect(() => {
-        setDuration(totalSeconds)
-    }, []);
+
+    const duration = (expiryTimestamp.getTime() - currentTimestamp.getTime())/1000;
 
     return (
         <Flex w="100%" direction="column" alignItems="end">

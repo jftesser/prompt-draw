@@ -1,9 +1,8 @@
-import { match } from "fp-ts/lib/Either";
 import { extractJSON } from "./Utils";
 import { getChat, getImage } from "./firebase/firebaseSetup";
 import { Metaprompt } from "./game/State";
 import { Message } from "./types";
-import * as t from "io-ts";
+import { z } from "zod";
 
 const systemNote = `You are a fun and snarky party game. You simulate a demanding celebrity client who needs an outfit for an upcoming red carpet. You must not be an alien, and please try not to use a space theme unless you feel really passionately about it. You will identify yourself and create a brief for a bunch of up-and-coming designers (the players). The players will describe outfits that meet your brief and you will judge them on which one you like most. Always write in the first person. You’re yelling directly at these people!
 
@@ -108,49 +107,45 @@ const getObject = async (messages: Message[]) => {
   return obj;
 };
 
-const stepOneCodec = t.type({ Message: t.string, "Celebrity name": t.string });
+const stepOneCodec = z.object({ Message: z.string(), "Celebrity name": z.string() });
 
 export const stepOne = async (): Promise<Metaprompt> => {
   const raw = await getObject(getMessagesStepOne());
-  const parsed = match(
-    () => {
-      throw new Error("Invalid Response");
-    },
-    (d: t.TypeOf<typeof stepOneCodec>) => d
-  )(stepOneCodec.decode(raw));
-
+  const parsed = stepOneCodec.safeParse(raw);
+  if (!parsed.success) {
+    throw new Error("Invalid Response");
+  }
+  const { data } = parsed;
   return {
-    celebrity: parsed["Celebrity name"],
-    metaprompt: parsed["Message"],
+    celebrity: data["Celebrity name"],
+    metaprompt: data["Message"],
   };
 };
 
 export type StepTwoData = { [uid: string]: string };
 
-const StepTwoCodec = t.record(t.string, t.string);
+const StepTwoCodec = z.record(z.string(), z.string());
 
 export const stepTwo = async (
   metaprompt: Metaprompt,
   prompts: { [uid: string]: string }
 ): Promise<StepTwoData> => {
   const raw = await getObject(getMessagesStepTwo(metaprompt, prompts));
-  // TODO - try again on failure?
-  const parsed = match(
-    () => {
-      throw new Error("Invalid Response");
-    },
-    (d: StepTwoData) => d
-  )(StepTwoCodec.decode(raw));
-
-  if (Object.keys(prompts).some((name) => !Object.hasOwn(parsed, name))) {
+  const parsed = StepTwoCodec.safeParse(raw);
+  if (!parsed.success) {
     throw new Error("Invalid Response");
   }
-  return parsed;
+  const { data } = parsed;
+
+  if (Object.keys(prompts).some((name) => !Object.hasOwn(data, name))) {
+    throw new Error("Invalid Response");
+  }
+  return data;
 };
 
-const StepThreeCodec = t.type({
-  Winner: t.string,
-  Message: t.string,
+const StepThreeCodec = z.object({
+  Winner: z.string(),
+  Message: z.string(),
 });
 
 export const stepThree = async (
@@ -163,20 +158,19 @@ export const stepThree = async (
     getMessagesStepThree(metaprompt, prompts, judgements)
   );
 
-  console.warn(raw);
-  const parsed = match(
-    () => {
-      throw new Error("Invalid Response");
-    },
-    (d: t.TypeOf<typeof StepThreeCodec>) => d
-  )(StepThreeCodec.decode(raw));
+  
+  const parsed = StepThreeCodec.safeParse(raw);
+  if (!parsed.success) {
+    throw new Error("Invalid Response");
+  }
+  const { data } = parsed;
 
-  if (!Object.hasOwn(prompts, parsed.Winner)) {
+  if (!Object.hasOwn(prompts, data.Winner)) {
     throw new Error("Invalid Response - invalid player!");
   }
   return {
-    uid: parsed.Winner,
-    message: parsed.Message,
+    uid: data.Winner,
+    message: data.Message,
   };
 };
 

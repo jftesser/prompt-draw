@@ -74,7 +74,7 @@ const root = ReactDOM.createRoot(
 );
 
 // know bug in chakra ui
-{localStorage.setItem('chakra-ui-color-mode', 'dark')}
+localStorage.setItem('chakra-ui-color-mode', 'dark');
 
 root.render(
   <React.StrictMode>

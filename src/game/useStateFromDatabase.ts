@@ -2,26 +2,25 @@ import { useCallback, useEffect, useState } from "react";
 import { Metaprompt, Player, State, WinnerData, Image } from "./State";
 import { get, off, onValue, ref, set } from "firebase/database";
 import { database } from "../firebase/firebaseSetup";
-import * as t from "io-ts";
-import { match } from "fp-ts/Either";
+import { z } from "zod";
 
-const PlayerCodec = t.type({ uid: t.string, name: t.string });
+const PlayerCodec = z.object({ uid: z.string(), name: z.string() });
 
-const LobbyCodec = t.record(t.string, PlayerCodec);
+const LobbyCodec = z.record(z.string(), PlayerCodec);
 
-const StartedCodec = t.type({
-  admin: t.string,
-  players: t.array(PlayerCodec),
+const StartedCodec = z.object({
+  admin: z.string(),
+  players: z.array(PlayerCodec),
 });
 
-const MetapromptCodec = t.type({
-  metaprompt: t.string,
-  celebrity: t.string,
+const MetapromptCodec = z.object({
+  metaprompt: z.string(),
+  celebrity: z.string(),
 });
 
-const WinnerCodec = t.type({
-  uid: t.string,
-  message: t.string,
+const WinnerCodec = z.object({
+  uid: z.string(),
+  message: z.string(),
 });
 
 export type ResolvedState = {
@@ -34,13 +33,13 @@ export type DBError = {
   error: string;
 };
 
-const UIDToStringCodec = t.record(t.string, t.string);
+const UIDToStringCodec = z.record(z.string(), z.string());
 
-const UIDToImageCodec = t.record(
-  t.string,
-  t.union([
-    t.type({ status: t.literal("censored") }),
-    t.type({ status: t.literal("image"), url: t.string }),
+const UIDToImageCodec = z.record(
+  z.string(),
+  z.union([
+    z.object({ status: z.literal("censored") }),
+    z.object({ status: z.literal("image"), url: z.string() }),
   ])
 );
 
@@ -201,39 +200,37 @@ const useStateFromDatabase = (
       return;
     }
 
-    type CodecData<T> = {
+    type CodecData<T, Codec extends z.ZodType<T>> = {
       path: string;
       setter: (x: T | undefined | string) => void;
-      codec: t.Type<T, unknown>;
+      codec: Codec;
     };
 
-    const connect = <T>({ path, setter, codec }: CodecData<T>) => {
+    const connect = <T, Codec extends z.ZodType<T>>({ path, setter, codec }: CodecData<T, Codec>) => {
       onValue(ref(database, `games/${gameId}/${path}`), (snapshot) => {
         if (!snapshot.exists()) {
           setter(undefined);
           return;
         }
-        match(
-          () => {
-            console.warn("FAILED TO DECODE", path, snapshot.val());
-            setter("Database error!");
-          },
-          (v) => {
-            setter(v as any);
-          }
-        )(codec.decode(snapshot.val()));
+        const parsed = codec.safeParse(snapshot.val());
+        if (!parsed.success) {
+          console.warn("FAILED TO DECODE", path, snapshot.val());
+          setter("Database error!");
+          return;
+        }
+        setter(parsed.data);
       });
     };
     connect({
       path: "lobby",
-      setter: mappedSetter(setLobbyPlayers, (xs: t.TypeOf<typeof LobbyCodec>) =>
+      setter: mappedSetter(setLobbyPlayers, (xs: z.infer<typeof LobbyCodec>) =>
         Object.values(xs)
       ),
       codec: LobbyCodec,
     });
     connect({
       path: "started",
-      setter: mappedSetter(setStarted, (x: t.TypeOf<typeof StartedCodec>) => {
+      setter: mappedSetter(setStarted, (x: z.infer<typeof StartedCodec>) => {
         const { admin, players } = x;
         return {
           admin,
@@ -255,7 +252,7 @@ const useStateFromDatabase = (
       codec: UIDToStringCodec,
     });
     connect({ path: "winner", setter: setWinner, codec: WinnerCodec });
-    connect({ path: "completed", setter: setCompleted, codec: t.boolean });
+    connect({ path: "completed", setter: setCompleted, codec: z.boolean() });
 
     return () => {
       for (const path of [

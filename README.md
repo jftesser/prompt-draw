@@ -1,4 +1,4 @@
-# Getting Started with Create React App
+# Fashion Frenzy, a GenAI game
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -29,6 +29,10 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
+### `yarn deploy`
+
+Builds the app and deploys it to firebase hosting and functions.\
+
 ## Firebase setup
 
 Create a new Firebase project and configure hosting, authentication, storage and functions
@@ -44,7 +48,7 @@ Setup firebase configuration in your local repo
 
 - In Firebase, go to Project Overview -> click the project name -> click the settings icon to go to project settings. 
 - In Project Settings, copy (or create and copy) the configuration data in the curly braces (including the curly braces). 
-- In `src/firebase`, create a file called `creds.ts` and paste the configuration data into the file. Format for json by replacing quotes as appropriate.
+- In `src/firebase`, create a file called `creds.ts` and paste the configuration data into the file. 
 - Open a new terminal from the root directory of your repo in VSCode, type `firebase login` to log in from the terminal 
 - In terminal, type `firebase init` and select the id of the project you just made
     -  Choose to set up hosting, functions already exist in the repo (but you will be using them), do not set up github actions

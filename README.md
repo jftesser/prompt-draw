@@ -51,19 +51,14 @@ Setup firebase configuration in your local repo
 
 Sign up for OpenAI and create an API key
 
-Set your OpenAI API key in firebase
-- Type `firebase functions:config:set openai.key="THE API KEY"` in the terminal
-- Type `firebase functions:config:set openai.org="THE ORG ID"` in the terminal
-- In terminal, go to `/functions` using `cd functions` from your root directory
-- Type `firebase functions:config:get > .runtimeconfig.json` in the terminal
-- In `.runtimeconfig.json` file, you should see this:
-```jSON
-{
-  "openai": {
-    "key": "YOUR OPENAI API KEY",
-    "org": "YOUR OPENAI ORG ID",
-  }
-}
+Sign up for Stability and create an API key
+
+Create a .env file inside the `functions` folder and add the following:
+
+```
+OPENAI_KEY="YOUR KEY" 
+OPENAI_ORG="YOUR ORG"                        
+STABILITY_API_KEY="YOUR KEY"
 ```
 
 Get your admin credentials for cors access [here](https://stackoverflow.com/questions/53143965/uploading-files-from-firebase-cloud-functions-to-cloud-storage) and place them in `functions/admin-credentials.json`

@@ -31,7 +31,7 @@ export type IntroState = CommonStartedState & {
 };
 
 export type WinnerData = {
-  uid: string;
+  uid?: string;
   message: string;
 };
 

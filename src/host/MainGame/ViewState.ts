@@ -30,8 +30,15 @@ export type WinnerRevealState = {
   markCompleted: () => void;
 };
 
+export type NoWinnerRevealState = {
+  stage: "noWinner";
+  message: string;
+  markCompleted: () => void;
+};
+
 export type ViewState =
   | MetapromptState
   | GeneratingState
   | JudgingState
-  | WinnerRevealState;
+  | WinnerRevealState
+  | NoWinnerRevealState;

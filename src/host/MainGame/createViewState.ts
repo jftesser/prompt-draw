@@ -65,12 +65,20 @@ export const createViewState = (
   if (!winnerPlayer) {
     throw new Error("Internal error - unexpected player");
   }
+  if (winner.uid) {
+    return {
+      stage: "winner",
+      winner: winnerPlayer.name,
+      message: winner.message,
+      image: state.images[winner.uid],
+      prompt: state.prompts[winner.uid],
+      markCompleted: state.markCompleted,
+    };
+  }
+
   return {
-    stage: "winner",
-    winner: winnerPlayer.name,
+    stage: "noWinner",
     message: winner.message,
-    image: state.images[winner.uid],
-    prompt: state.prompts[winner.uid],
     markCompleted: state.markCompleted,
   };
 };

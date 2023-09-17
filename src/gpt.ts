@@ -152,7 +152,7 @@ export const stepThree = async (
   metaprompt: Metaprompt,
   prompts: { [uid: string]: string },
   judgements: { [uid: string]: string }
-): Promise<{ uid: string; message: string }> => {
+): Promise<{ uid?: string; message: string }> => {
   // TODO - try again on failure?
   const raw = await getObject(
     getMessagesStepThree(metaprompt, prompts, judgements)
@@ -164,6 +164,13 @@ export const stepThree = async (
     throw new Error("Invalid Response");
   }
   const { data } = parsed;
+
+  // handle not having a winner
+  if (data.Winner === "None") {
+    return {
+      message: data.Message,
+    };
+  }
 
   if (!Object.hasOwn(prompts, data.Winner)) {
     throw new Error("Invalid Response - invalid player!");

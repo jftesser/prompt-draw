@@ -158,7 +158,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
         }
 
         await addWinner({
-          uid: newWinner.uid,
+          ...(newWinner.uid && {uid: newWinner.uid}),
           message: swapUIDForName(newWinner.message, players),
         });
       } catch (error) {

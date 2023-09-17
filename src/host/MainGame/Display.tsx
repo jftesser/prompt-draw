@@ -7,6 +7,7 @@ import Metaprompt from "./Metaprompt";
 import Generating from "./Generating";
 import Judging from "./Judging";
 import WinnerReveal from "./WinnerReveal";
+import NoWinnerReveal from "./NoWinnerReveal";
 
 const Display: FC<{ state: ViewState }> = ({ state }) => {
   if (state.stage === "metaprompt") {
@@ -20,6 +21,9 @@ const Display: FC<{ state: ViewState }> = ({ state }) => {
   }
   if (state.stage === "winner") {
     return <WinnerReveal state={state} />;
+  }
+  if (state.stage === "noWinner") {
+    return <NoWinnerReveal state={state} />;
   }
   return unreachable(state);
 };

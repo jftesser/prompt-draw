@@ -5,6 +5,7 @@ import createViewState from "./createViewState";
 import { getImageURL, stepTwo, stepThree } from "../../gpt";
 import update from "immutability-helper";
 import { swapUIDForName } from "../../Utils";
+import { PastWinner, getPastWinners } from "../../game/getPastWinners";
 
 const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
   const [displayedJudgements, setDisplayedJudgement] = useState<{
@@ -13,6 +14,8 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
   const imageCancelers = useRef<{
     [uid: string]: { prompt: string; celebrity: string; cancel: () => void };
   }>({});
+
+  const [pastWinners, setPastWinners] = useState<PastWinner[]>([]);
 
   const {
     winner,
@@ -175,6 +178,26 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     winner,
   ]);
 
+  useEffect(() => {
+    const canceled = { current: false };
+    (async () => {
+      try {
+        const pastWinners = await getPastWinners();
+        if (canceled.current) {
+          return;
+        }
+        setPastWinners(pastWinners);
+      } catch (error) {
+        console.error("getting past winners error:", error);
+        setPastWinners([]);
+      }
+    })();
+    return () => {
+      canceled.current = true;
+    };
+  }
+  ,[]);
+
   const nextJudgement = useMemo(() => {
     const player = state.players.find(
       (player) => !Object.hasOwn(displayedJudgements, player.uid)
@@ -192,8 +215,8 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     };
   }, [displayedJudgements, judgements, state.players]);
   const viewState = useMemo(() => {
-    return createViewState(state, nextJudgement);
-  }, [state, nextJudgement]);
+    return createViewState(state, nextJudgement, pastWinners);
+  }, [state, nextJudgement, pastWinners]);
 
   return <Display state={viewState} />;
 };

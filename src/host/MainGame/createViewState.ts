@@ -1,4 +1,5 @@
 import { MainGameState, Player } from "../../game/State";
+import { PastWinner } from "../../game/getPastWinners";
 import { ViewState } from "./ViewState";
 
 export type Judgement = {
@@ -8,7 +9,8 @@ export type Judgement = {
 
 export const createViewState = (
   state: MainGameState,
-  nextJudgement: Judgement | undefined
+  nextJudgement: Judgement | undefined,
+  pastWinners: PastWinner[]
 ): ViewState => {
   if (
     state.players.some((player) => !Object.hasOwn(state.prompts, player.uid))
@@ -23,7 +25,7 @@ export const createViewState = (
     state.players.some((player) => !Object.hasOwn(state.images, player.uid)) ||
     state.players.some((player) => !Object.hasOwn(state.judgements, player.uid))
   ) {
-    return { stage: "generating" };
+    return { stage: "generating", pastWinners };
   }
 
   if (nextJudgement) {
@@ -52,6 +54,7 @@ export const createViewState = (
   if (state.winner === undefined) {
     return {
       stage: "generating",
+      pastWinners: [],
     };
   }
   const winner = state.winner;

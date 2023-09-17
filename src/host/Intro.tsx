@@ -33,11 +33,10 @@ const Intro: FC<{ state: IntroState }> = ({ state }) => {
     <Divider orientation="horizontal" mt="2em" mb="2em" />
     <Text fontSize="2xl">
       <Text mb="0.5em">You are all up and coming designers competing for a prestigous commission. A celebrity needs a new outfit for their upcoming red carpet. You'll each describe an avant garde garment that meets your prospective client's brief for their judgement.</Text>
-      <Text mb="0.5em">Expect criticism.</Text> 
+      <Text mb="0.5em">Expect criticism.</Text>
       <Text>Fashion is a ruthless business.</Text>
-      </Text>
-    {!metaprompt && <Spinner size="xl" mb="1em" />}
-    {metaprompt && <Button size="xl" alignSelf="end" variant="link" onClick={() => state.moveToMetaprompt(metaprompt)}><ArrowForwardIcon boxSize={10} /></Button>}
+    </Text>
+    { metaprompt ? <Button size="xl" alignSelf="end" variant="link" onClick={() => state.moveToMetaprompt(metaprompt)}><ArrowForwardIcon boxSize={10} /></Button> : <Spinner size="xl" mb="1em" /> }
   </Flex>;
 };
 export default Intro;

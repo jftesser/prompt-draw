@@ -1,4 +1,5 @@
 import { Metaprompt, Image } from "../../game/State";
+import { PastWinner } from "../../game/getPastWinners";
 
 export type MetapromptState = {
   stage: "metaprompt";
@@ -7,6 +8,8 @@ export type MetapromptState = {
 
 export type GeneratingState = {
   stage: "generating";
+  // this will be an empty list if no winners should be shown or there is an error retrieving them
+  pastWinners: PastWinner[];
 };
 
 export type JudgingState = {

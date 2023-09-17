@@ -1,3 +1,5 @@
+import { PastWinner } from "../firebase/getPastWinners";
+
 export type Player = {
   name: string;
   uid: string;
@@ -6,6 +8,7 @@ export type Player = {
 export type CommonState = {
   gameId: string;
   players: Player[];
+  getPastWinners: () => Promise<PastWinner[]>;
 };
 
 export type LobbyState = CommonState & {

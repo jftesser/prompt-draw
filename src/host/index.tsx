@@ -2,7 +2,7 @@ import { FC, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { get, ref } from "firebase/database";
 import { database } from "../firebase/firebaseSetup";
-import useStateFromDatabase from "../game/useStateFromDatabase";
+import useStateFromDatabase from "../firebase/useStateFromDatabase";
 import Display from "./Display";
 
 export type RouteArgs = {

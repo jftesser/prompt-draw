@@ -5,7 +5,7 @@ import createViewState from "./createViewState";
 import { getImageURL, stepTwo, stepThree } from "../../gpt";
 import update from "immutability-helper";
 import { swapUIDForName } from "../../Utils";
-import { PastWinner, getPastWinners } from "../../game/getPastWinners";
+import { PastWinner } from "../../firebase/getPastWinners";
 
 const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
   const [displayedJudgements, setDisplayedJudgement] = useState<{
@@ -26,6 +26,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     judgements,
     addJudgement,
     addWinner,
+    getPastWinners,
     metaprompt: { celebrity, metaprompt },
   } = state;
 
@@ -196,7 +197,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
       canceled.current = true;
     };
   }
-  ,[]);
+  ,[getPastWinners]);
 
   const nextJudgement = useMemo(() => {
     const player = state.players.find(

@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { Metaprompt, Player, State, WinnerData, Image } from "./State";
+import { Metaprompt, Player, State, WinnerData, Image } from "../game/State";
 import { get, off, onValue, ref, set } from "firebase/database";
-import { database } from "../firebase/firebaseSetup";
+import { database } from "./firebaseSetup";
 import { z } from "zod";
+import { getPastWinners } from "./getPastWinners";
 
 const PlayerCodec = z.object({ uid: z.string(), name: z.string() });
 
@@ -308,7 +309,7 @@ const useStateFromDatabase = (
   }
 
   if (started !== undefined) {
-    const common = { players: started.players, gameId, admin: started.admin };
+    const common = { players: started.players, gameId, admin: started.admin, getPastWinners };
     if (completed && winner !== undefined) {
       const winnerPlayer = started.players.find(
         (player) => player.uid === winner.uid
@@ -372,7 +373,7 @@ const useStateFromDatabase = (
 
   return {
     status: "state",
-    state: { stage: "lobby", players: lobbyPlayers ?? [], gameId, startGame },
+    state: { stage: "lobby", players: lobbyPlayers ?? [], gameId, startGame, getPastWinners },
   };
 };
 

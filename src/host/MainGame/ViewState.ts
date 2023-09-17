@@ -1,5 +1,5 @@
 import { Metaprompt, Image } from "../../game/State";
-import { PastWinner } from "../../game/getPastWinners";
+import { PastWinner } from "../../firebase/getPastWinners";
 
 export type MetapromptState = {
   stage: "metaprompt";

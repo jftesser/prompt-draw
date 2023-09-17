@@ -15,7 +15,7 @@ import {
   MainGameState,
   CompletedState,
 } from "./State";
-import useStateFromDatabase from "./useStateFromDatabase";
+import useStateFromDatabase from "../firebase/useStateFromDatabase";
 import { unreachable } from "../Utils";
 
 type ResolvedSpecificState<State> = {

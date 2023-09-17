@@ -1,6 +1,6 @@
 import { get,ref, query, equalTo, orderByChild } from "firebase/database";
-import { database } from "../firebase/firebaseSetup";
-import { Image } from "./State";
+import { database } from "./firebaseSetup";
+import { Image } from "../game/State";
 
 export type PastWinner = {
     image: Image;

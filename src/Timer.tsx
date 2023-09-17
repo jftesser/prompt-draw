@@ -14,7 +14,7 @@ const Timer: FC<{ currentTimestamp: Date, expiryTimestamp: Date, callback: () =>
     return (
         <Flex w="100%" direction="column" alignItems="end">
             <Progress colorScheme='whiteAlpha' w="100%" value={(1.0-totalSeconds/duration)*100} />
-            <Text fontSize={["1em", "2em"]}>
+            <Text fontSize={"1em"}>
                 <span>{minutes}</span>:<span>{seconds.toString().padStart(2, '0')}</span>
             </Text>
 

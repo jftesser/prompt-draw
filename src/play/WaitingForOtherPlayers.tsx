@@ -7,7 +7,7 @@ const WaitingForOtherPlayers: FC<{ state: WaitingForOthersState }> = ({
 }) => {
   return <Flex direction="column" align="center">
     <Spinner size="xl" mb="1em" />
-    <Text>Waiting on your competition...</Text>
+    <Text fontSize="2xl">Waiting on your competition...</Text>
   </Flex>;
 };
 export default WaitingForOtherPlayers;

@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { NoWinnerRevealState } from "./ViewState";
-import { Button, Flex, Text, Heading } from '@chakra-ui/react';
+import { Button, Text, Heading } from '@chakra-ui/react';
 import { ArrowForwardIcon } from '@chakra-ui/icons';
 import Speak from "../../Speak";
 

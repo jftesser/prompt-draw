@@ -14,7 +14,7 @@ const Completed: FC<{ state: CompletedState }> = ({ state }) => {
     const isTheWinner = state.winner.name === name;
     return <Card position="relative" key={name} m="1em" display="flex" flexDirection="column" alignItems="center" p="1em" background="white">
       {isTheWinner && <div className="star">★</div>}
-      <ImageDisplay image={image} prompt={prompt} sz="25vh" />
+      <ImageDisplay image={image} prompt={prompt} sz="20vh" />
       <Text fontSize="2xl" color="black" fontFamily='Covered By Your Grace'>{name}</Text>
     </Card>;
   };

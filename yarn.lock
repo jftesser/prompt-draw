@@ -13209,6 +13209,11 @@ tsutils@^3.21.0:
   dependencies:
     tslib "^1.8.1"
 
+tts-react@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/tts-react/-/tts-react-3.0.1.tgz#7fbd2edb65493af15ed7cb30c3d37223c2fcfeeb"
+  integrity sha512-v/kUYPyLHB9xAUtI+EF/dU1fEqzP6BByg8fLI9+BcZGJyT+tfT4Yv/cTE7bzhPBS9W90a79XujyikMrG1QqR9g==
+
 tunnel-agent@^0.6.0:
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/tunnel-agent/-/tunnel-agent-0.6.0.tgz#27a5dea06b36b04a0a9966774b290868f0fc40fd"

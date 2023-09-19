@@ -22,6 +22,7 @@
     "react-scripts": "5.0.1",
     "react-timer-hook": "^3.0.7",
     "sass": "^1.66.1",
+    "tts-react": "^3.0.1",
     "typescript": "^4.4.2",
     "web-vitals": "^2.1.0",
     "zod": "^3.22.2"

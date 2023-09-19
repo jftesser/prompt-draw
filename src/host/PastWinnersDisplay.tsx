@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from "react";
 import { PastWinner } from "../firebase/getPastWinners";
-import { Box, Card, Text } from "@chakra-ui/react";
+import { Card, Text } from "@chakra-ui/react";
 import ImageDisplay from "./ImageDisplay";
 import { useTimer } from "react-timer-hook";
 

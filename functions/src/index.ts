@@ -1,8 +1,7 @@
 import { randomUUID } from "crypto";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { getChat } from "./openai";
+import { getChat, getDalle } from "./openai";
 import { uploadImage } from "./upload";
-import { getStabilityImage } from "./stability";
 
 exports.getImage = onCall(async (request) => {
   if (!request.auth) {
@@ -12,7 +11,7 @@ exports.getImage = onCall(async (request) => {
     );
   }
   const data = request.data;
-  const blobs = await getStabilityImage(data.prompt, data.count);
+  const blobs = await getDalle(data.prompt, data.count);
 
   const promises = blobs.map(async (blob) => {
     if (blob) {

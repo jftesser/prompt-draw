@@ -86,6 +86,10 @@ const Content: FC = () => {
         <Flex align="center">
           <form className="join-game-form" onSubmit={onJoinGame}>
             <Input
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck="false"
+              autoComplete="off"
               mt="2em"
               mb="0.5em"
               type="text"
@@ -121,7 +125,6 @@ const Content: FC = () => {
           >
             Log out
           </Button>
-
         </Flex>
         {hoster ? (
           <>

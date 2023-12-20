@@ -6,6 +6,7 @@ export type PastWinner = {
     image: Image;
     winnerName: string;
     celebrityName: string;
+    celebrityDecription: string;
 }
 
 export const getPastWinners = async (): Promise<PastWinner[]> => {
@@ -18,6 +19,7 @@ export const getPastWinners = async (): Promise<PastWinner[]> => {
             const winnerUid = game.child("winner/uid").val();
             const winnerImage = game.child(`images/${winnerUid}`).val();
             const celebrityName = game.child("metaprompt/celebrity").val();
+            const celebrityDecription = game.child("metaprompt/metaprompt").val();
             const players = game.child("started/players");
             let winnerName = "";
             players.forEach((player) => {
@@ -29,7 +31,8 @@ export const getPastWinners = async (): Promise<PastWinner[]> => {
                 pastWinners.push({
                     image: winnerImage,
                     winnerName,
-                    celebrityName
+                    celebrityName,
+                    celebrityDecription
                 });
             }
         }

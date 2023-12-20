@@ -104,7 +104,8 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
       try {
         const judgements = await stepTwo(
           { celebrity, metaprompt },
-          prompts
+          prompts,
+          pastWinners
         );
         if (canceled.current) {
           return;
@@ -148,7 +149,8 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
         const newWinner = await stepThree(
           { celebrity, metaprompt },
           prompts,
-          judgements
+          judgements,
+          pastWinners
         );
         if (canceled.current) {
           return;

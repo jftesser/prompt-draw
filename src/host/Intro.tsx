@@ -11,7 +11,7 @@ const Intro: FC<{ state: IntroState }> = ({ state }) => {
     const canceled = { current: false };
     (async () => {
       try {
-        const metaprompt = await stepOne() as Metaprompt;
+        const metaprompt = await stepOne(state.pastWinners) as Metaprompt;
         if (canceled.current) return;
         setMetaprompt(metaprompt);
       } catch (error) {

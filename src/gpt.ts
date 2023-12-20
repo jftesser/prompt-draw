@@ -182,7 +182,7 @@ export const stepThree = async (
 };
 
 export const getImageURL = async (prompt: string, celebrity: string) => {
-  const fullPrompt = `Full body red carpet photo of ${celebrity} wearing ${prompt}`;
+  const fullPrompt = `full-body celebrity red carpet fashion photograph of ${celebrity} the human wearing ${prompt} real photography awards show ceremony`;
   const urls = (await getImage({ prompt: fullPrompt, count: 1 }))
     .data as string[];
   return urls[0];

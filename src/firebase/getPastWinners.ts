@@ -1,4 +1,4 @@
-import { get,ref, query, equalTo, orderByChild } from "firebase/database";
+import { get,ref, query, equalTo, orderByChild, limitToLast } from "firebase/database";
 import { database } from "./firebaseSetup";
 import { Image } from "../game/State";
 
@@ -10,7 +10,7 @@ export type PastWinner = {
 }
 
 export const getPastWinners = async (): Promise<PastWinner[]> => {
-    const gamesRef = query(ref(database, "games"), orderByChild("completed"), equalTo(true));
+    const gamesRef = query(ref(database, "games"), orderByChild("completed"), equalTo(true), limitToLast(5));
     // consider swithching to getting once with onValue
     const games = await get(gamesRef);
     const pastWinners: PastWinner[] = [];

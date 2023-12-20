@@ -26,12 +26,12 @@ const GetPrompt: FC<{ state: GetPromptState }> = ({ state }) => {
     <div>
 
       <div>
-        <Heading fontSize={["4em", "6em"]} lineHeight="0.8" mb="1rem">Your challenge:</Heading>
-        <Text fontSize={"1em"}>{state.metaprompt.metaprompt}</Text>
+        <Heading fontSize={["2em", "6em"]} lineHeight="0.8" mb="1rem">Your challenge:</Heading>
+        <Text fontSize={["0.75em", "1em"]}>{state.metaprompt.metaprompt}</Text>
       </div>
 
       <div>
-        <Heading fontSize={["4em", "6em"]} lineHeight="0.8" mt="1em" mb="1rem">Your response:</Heading>
+        <Heading fontSize={["2em", "6em"]} lineHeight="0.8" mt="1em" mb="1rem">Your response:</Heading>
         <Box mb="1em">
           <Text fontSize={"1em"}>You have two minutes! Tick. Tock.</Text>
           <Timer currentTimestamp={now.current} expiryTimestamp={time.current} callback={() => { getPrompt(prompt.length ? prompt : "a clown suit") }} />

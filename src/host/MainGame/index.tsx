@@ -5,7 +5,6 @@ import createViewState from "./createViewState";
 import { getImageURL, stepTwo, stepThree } from "../../gpt";
 import update from "immutability-helper";
 import { swapUIDForName } from "../../Utils";
-import { PastWinner } from "../../firebase/getPastWinners";
 
 const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
   const [displayedJudgements, setDisplayedJudgement] = useState<{
@@ -14,8 +13,6 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
   const imageCancelers = useRef<{
     [uid: string]: { prompt: string; celebrity: string; cancel: () => void };
   }>({});
-
-  const [pastWinners, setPastWinners] = useState<PastWinner[]>([]);
 
   const {
     winner,
@@ -26,7 +23,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     judgements,
     addJudgement,
     addWinner,
-    getPastWinners,
+    pastWinners,
     metaprompt: { celebrity, metaprompt },
   } = state;
 
@@ -178,26 +175,6 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     prompts,
     winner,
   ]);
-
-  useEffect(() => {
-    const canceled = { current: false };
-    (async () => {
-      try {
-        const pastWinners = await getPastWinners();
-        if (canceled.current) {
-          return;
-        }
-        setPastWinners(pastWinners);
-      } catch (error) {
-        console.error("getting past winners error:", error);
-        setPastWinners([]);
-      }
-    })();
-    return () => {
-      canceled.current = true;
-    };
-  }
-  ,[getPastWinners]);
 
   const nextJudgement = useMemo(() => {
     const player = state.players.find(

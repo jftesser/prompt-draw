@@ -1,5 +1,4 @@
-import { MainGameState, Player } from "../../game/State";
-import { PastWinner } from "../../firebase/getPastWinners";
+import { MainGameState, PastWinner, Player } from "../../game/State";
 import { ViewState } from "./ViewState";
 
 export type Judgement = {

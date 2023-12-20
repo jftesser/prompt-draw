@@ -1,36 +1,46 @@
-import { FC, useState, useMemo } from "react";
-import { PastWinner } from "../firebase/getPastWinners";
+import { FC, useState, useMemo, useEffect } from "react";
 import { Card, Text } from "@chakra-ui/react";
 import ImageDisplay from "./ImageDisplay";
 import { useTimer } from "react-timer-hook";
+import { PastWinner } from "../game/State";
 
 const PastWinnersDisplay: FC<{ pastWinners: PastWinner[] }> = ({ pastWinners }) => {
     const dur = 5000;
     const numWinners = pastWinners.length;
     const getNextIndex = useMemo(() => {
+        if (numWinners === 0) return () => undefined;
         const availableIndices = new Set<number>(Array.from(Array(numWinners).keys()));
+        const lastIndex = { current: undefined }
         return () => {
             if (availableIndices.size === 0) {
                 for (let i = 0; i < numWinners; i++) {
-                    availableIndices.add(i);
+                    if (i !== lastIndex.current) {
+                        availableIndices.add(i);
+                    }
                 }
             }
             const index = Math.floor(Math.random() * availableIndices.size);
+
             const values = availableIndices.values();
             for (let i = 0; i < index; i++) {
                 values.next();
             }
             const next = values.next().value;
             availableIndices.delete(next);
+            lastIndex.current = next
             return next;
         }
     }, [numWinners])
-    const [currIndex, setCurrIndex] = useState(() => getNextIndex());
+
+    const [currIndex, setCurrIndex] = useState(undefined);
+    useEffect(() => {
+        setCurrIndex(getNextIndex());
+    }, [getNextIndex])
 
     const {restart} = useTimer({
         expiryTimestamp: new Date(Date.now() + dur), onExpire: () => {
             setCurrIndex(getNextIndex());
-            restart(new Date(Date.now() + dur));
+            setTimeout(() => {restart(new Date(Date.now() + dur))}, 0);
         }
     });
 
@@ -42,7 +52,7 @@ const PastWinnersDisplay: FC<{ pastWinners: PastWinner[] }> = ({ pastWinners }) 
         </Card>;
     };
     return <div>
-        {pastWinners.length ? renderWinner(pastWinners[currIndex]) : undefined}
+        {(pastWinners.length && currIndex !== undefined) ? renderWinner(pastWinners[currIndex]) : undefined}
     </div>;
 };
 

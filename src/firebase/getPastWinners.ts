@@ -1,13 +1,6 @@
 import { get,ref, query, equalTo, orderByChild, limitToLast } from "firebase/database";
 import { database } from "./firebaseSetup";
-import { Image } from "../game/State";
-
-export type PastWinner = {
-    image: Image;
-    winnerName: string;
-    celebrityName: string;
-    celebrityDecription: string;
-}
+import { PastWinner } from "../game/State";
 
 export const getPastWinners = async (): Promise<PastWinner[]> => {
     const gamesRef = query(ref(database, "games"), orderByChild("completed"), equalTo(true), limitToLast(5));

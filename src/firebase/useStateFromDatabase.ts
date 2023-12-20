@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Metaprompt, Player, State, WinnerData, Image } from "../game/State";
+import { Metaprompt, Player, State, WinnerData, Image, PastWinner } from "../game/State";
 import { get, off, onValue, ref, set } from "firebase/database";
 import { database } from "./firebaseSetup";
 import { z } from "zod";
@@ -159,6 +159,27 @@ const useStateFromDatabase = (
   const [completed, setCompleted] = useState<undefined | boolean | string>(
     undefined
   );
+  const [pastWinners, setPastWinners] = useState<PastWinner[]>([]);
+
+  useEffect(() => {
+    const canceled = { current: false };
+    (async () => {
+      try {
+        const pastWinners = await getPastWinners();
+        if (canceled.current) {
+          return;
+        }
+        setPastWinners(pastWinners);
+      } catch (error) {
+        console.error("getting past winners error:", error);
+        setPastWinners([]);
+      }
+    })();
+    return () => {
+      canceled.current = true;
+    };
+  }
+  ,[]);
 
   const moveToMetaprompt = useCallback(
     async (metaprompt: Metaprompt) => {
@@ -309,7 +330,7 @@ const useStateFromDatabase = (
   }
 
   if (started !== undefined) {
-    const common = { players: started.players, gameId, admin: started.admin, getPastWinners };
+    const common = { players: started.players, gameId, admin: started.admin, pastWinners };
     if (completed && winner !== undefined) {
       const winnerPlayer = started.players.find(
         (player) => player.uid === winner.uid
@@ -373,7 +394,7 @@ const useStateFromDatabase = (
 
   return {
     status: "state",
-    state: { stage: "lobby", players: lobbyPlayers ?? [], gameId, startGame, getPastWinners },
+    state: { stage: "lobby", players: lobbyPlayers ?? [], gameId, startGame, pastWinners },
   };
 };
 

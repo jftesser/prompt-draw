@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from "react";
+import { FC, useState, useMemo } from "react";
 import { PastWinner } from "../firebase/getPastWinners";
 import { Card, Text } from "@chakra-ui/react";
 import ImageDisplay from "./ImageDisplay";
@@ -6,21 +6,33 @@ import { useTimer } from "react-timer-hook";
 
 const PastWinnersDisplay: FC<{ pastWinners: PastWinner[] }> = ({ pastWinners }) => {
     const dur = 5000;
-    const [currIndex, setCurrIndex] = useState(0);
-    const [flipState, setFlipState] = useState(true);
+    const numWinners = pastWinners.length;
+    const getNextIndex = useMemo(() => {
+        const availableIndices = new Set<number>(Array.from(Array(numWinners).keys()));
+        return () => {
+            if (availableIndices.size === 0) {
+                for (let i = 0; i < numWinners; i++) {
+                    availableIndices.add(i);
+                }
+            }
+            const index = Math.floor(Math.random() * availableIndices.size);
+            const values = availableIndices.values();
+            for (let i = 0; i < index; i++) {
+                values.next();
+            }
+            const next = values.next().value;
+            availableIndices.delete(next);
+            return next;
+        }
+    }, [numWinners])
+    const [currIndex, setCurrIndex] = useState(() => getNextIndex());
 
     const {restart} = useTimer({
         expiryTimestamp: new Date(Date.now() + dur), onExpire: () => {
-            const nextInd = (currIndex + 1) % pastWinners.length;
-            setCurrIndex(nextInd);
-            setFlipState(!flipState);
+            setCurrIndex(getNextIndex());
+            restart(new Date(Date.now() + dur));
         }
     });
-
-    useEffect(() => {
-        const time = new Date(Date.now() + dur);
-        restart(time);
-    }, [flipState, restart])
 
     const renderWinner = (winner: PastWinner) => {
         return <Card position="relative" m="1em" display="flex" flexDirection="column" alignItems="center" p="1em" background="white">

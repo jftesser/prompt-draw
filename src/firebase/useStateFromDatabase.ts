@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { Metaprompt, Player, State, WinnerData, Image, PastWinner } from "../game/State";
+import {
+  Metaprompt,
+  Player,
+  State,
+  WinnerData,
+  Image,
+  PastWinner,
+} from "../game/State";
 import { get, off, onValue, ref, set } from "firebase/database";
 import { database } from "./firebaseSetup";
 import { z } from "zod";
@@ -160,6 +167,7 @@ const useStateFromDatabase = (
     undefined
   );
   const [pastWinners, setPastWinners] = useState<PastWinner[]>([]);
+  const [restartCount, setRestartCount] = useState<number>(0);
 
   useEffect(() => {
     const canceled = { current: false };
@@ -178,8 +186,7 @@ const useStateFromDatabase = (
     return () => {
       canceled.current = true;
     };
-  }
-  ,[]);
+  }, []);
 
   const moveToMetaprompt = useCallback(
     async (metaprompt: Metaprompt) => {
@@ -214,8 +221,9 @@ const useStateFromDatabase = (
     if (gameId === undefined) {
       return;
     }
+    setRestartCount(restartCount + 1);
     await restartGameInternal(gameId);
-  }, [gameId]);
+  }, [gameId, restartCount]);
 
   useEffect(() => {
     if (!gameId) {
@@ -228,7 +236,11 @@ const useStateFromDatabase = (
       codec: Codec;
     };
 
-    const connect = <T, Codec extends z.ZodType<T>>({ path, setter, codec }: CodecData<T, Codec>) => {
+    const connect = <T, Codec extends z.ZodType<T>>({
+      path,
+      setter,
+      codec,
+    }: CodecData<T, Codec>) => {
       onValue(ref(database, `games/${gameId}/${path}`), (snapshot) => {
         if (!snapshot.exists()) {
           setter(undefined);
@@ -330,7 +342,12 @@ const useStateFromDatabase = (
   }
 
   if (started !== undefined) {
-    const common = { players: started.players, gameId, admin: started.admin, pastWinners };
+    const common = {
+      players: started.players,
+      gameId,
+      admin: started.admin,
+      pastWinners,
+    };
     if (completed && winner !== undefined) {
       const winnerPlayer = started.players.find(
         (player) => player.uid === winner.uid
@@ -394,7 +411,13 @@ const useStateFromDatabase = (
 
   return {
     status: "state",
-    state: { stage: "lobby", players: lobbyPlayers ?? [], gameId, startGame, pastWinners },
+    state: {
+      stage: "lobby",
+      players: lobbyPlayers ?? [],
+      gameId,
+      startGame,
+      pastWinners,
+    },
   };
 };
 

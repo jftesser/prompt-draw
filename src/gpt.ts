@@ -1,6 +1,6 @@
 import { extractJSON } from "./Utils";
 import { getChat, getImage } from "./firebase/firebaseSetup";
-import { Metaprompt, PastWinner } from "./game/State";
+import { Metaprompt, PastCelebrity } from "./game/State";
 import { Message } from "./types";
 import { z } from "zod";
 
@@ -113,14 +113,14 @@ const getObject = async (messages: Message[]) => {
   return obj;
 };
 
-const winnersToCelebs = (pastWinners: PastWinner[]) => {
-  return pastWinners.slice(0,4).map(w => `${w.celebrityName}: ${w.celebrityDecription}`).join('\n');
+const winnersToCelebs = (pastCelebrities: PastCelebrity[]) => {
+  return pastCelebrities.slice(0,4).map(w => `${w.celebrityName}: ${w.celebrityDecription}`).join('\n');
 }
 
 const stepOneCodec = z.object({ Message: z.string(), "Celebrity name": z.string() });
 
-export const stepOne = async (pastWinners: PastWinner[]): Promise<Metaprompt> => {
-  const raw = await getObject(getMessagesStepOne(winnersToCelebs(pastWinners)));
+export const stepOne = async (pastCelebrities: PastCelebrity[]): Promise<Metaprompt> => {
+  const raw = await getObject(getMessagesStepOne(winnersToCelebs(pastCelebrities)));
   const parsed = stepOneCodec.safeParse(raw);
   if (!parsed.success) {
     throw new Error("Invalid Response");
@@ -139,9 +139,9 @@ const StepTwoCodec = z.record(z.string(), z.string());
 export const stepTwo = async (
   metaprompt: Metaprompt,
   prompts: { [uid: string]: string },
-  pastWinners: PastWinner[]
+  pastCelebrities: PastCelebrity[]
 ): Promise<StepTwoData> => {
-  const raw = await getObject(getMessagesStepTwo(metaprompt, prompts, winnersToCelebs(pastWinners)));
+  const raw = await getObject(getMessagesStepTwo(metaprompt, prompts, winnersToCelebs(pastCelebrities)));
   const parsed = StepTwoCodec.safeParse(raw);
   if (!parsed.success) {
     throw new Error("Invalid Response");
@@ -163,11 +163,11 @@ export const stepThree = async (
   metaprompt: Metaprompt,
   prompts: { [uid: string]: string },
   judgements: { [uid: string]: string },
-  pastWinners: PastWinner[]
+  pastCelebrities: PastCelebrity[]
 ): Promise<{ uid?: string; message: string }> => {
   // TODO - try again on failure?
   const raw = await getObject(
-    getMessagesStepThree(metaprompt, prompts, judgements, winnersToCelebs(pastWinners))
+    getMessagesStepThree(metaprompt, prompts, judgements, winnersToCelebs(pastCelebrities))
   );
 
   

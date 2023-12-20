@@ -11,7 +11,7 @@ const Intro: FC<{ state: IntroState }> = ({ state }) => {
     const canceled = { current: false };
     (async () => {
       try {
-        const metaprompt = await stepOne(state.pastWinners) as Metaprompt;
+        const metaprompt = await stepOne(state.pastCelebrities) as Metaprompt;
         if (canceled.current) return;
         setMetaprompt(metaprompt);
       } catch (error) {
@@ -22,7 +22,7 @@ const Intro: FC<{ state: IntroState }> = ({ state }) => {
     return () => {
       canceled.current = true;
     };
-  }, [state.pastWinners]);
+  }, [state.pastCelebrities]);
 
   return <Flex direction="column" align="center">
     <div>

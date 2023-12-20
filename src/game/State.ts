@@ -3,6 +3,11 @@ export type Player = {
   uid: string;
 };
 
+export type PastCelebrity = {
+  celebrityName: string;
+  celebrityDecription: string;
+}
+
 export type PastWinner = {
   image: Image;
   winnerName: string;
@@ -14,6 +19,7 @@ export type CommonState = {
   gameId: string;
   players: Player[];
   pastWinners: PastWinner[];
+  pastCelebrities: PastCelebrity[];
 };
 
 export type LobbyState = CommonState & {

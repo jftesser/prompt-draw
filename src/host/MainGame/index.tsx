@@ -24,6 +24,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     addJudgement,
     addWinner,
     pastWinners,
+    pastCelebrities,
     metaprompt: { celebrity, metaprompt },
   } = state;
 
@@ -105,7 +106,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
         const judgements = await stepTwo(
           { celebrity, metaprompt },
           prompts,
-          pastWinners
+          pastCelebrities
         );
         if (canceled.current) {
           return;
@@ -129,7 +130,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     metaprompt,
     players,
     prompts,
-    pastWinners
+    pastCelebrities
   ]);
 
   // Choose winner when appropriate
@@ -151,7 +152,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
           { celebrity, metaprompt },
           prompts,
           judgements,
-          pastWinners
+          pastCelebrities
         );
         if (canceled.current) {
           return;
@@ -177,7 +178,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     players,
     prompts,
     winner,
-    pastWinners
+    pastCelebrities,
   ]);
 
   const nextJudgement = useMemo(() => {

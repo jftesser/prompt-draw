@@ -6,6 +6,7 @@ import {
   WinnerData,
   Image,
   PastWinner,
+  PastCelebrity,
 } from "../game/State";
 import { get, off, onValue, ref, set } from "firebase/database";
 import { database } from "./firebaseSetup";
@@ -148,9 +149,9 @@ const useStateFromDatabase = (
   const [started, setStarted] = useState<undefined | Started | string>(
     undefined
   );
-  const [metaprompt, setMetaprompt] = useState<undefined | Metaprompt | string>(
-    undefined
-  );
+  const [metaprompt, setMetapromptInternal] = useState<
+    undefined | Metaprompt | string
+  >(undefined);
   const [prompts, setPrompts] = useState<
     undefined | { [uid: string]: string } | string
   >(undefined);
@@ -167,6 +168,28 @@ const useStateFromDatabase = (
     undefined
   );
   const [pastWinners, setPastWinners] = useState<PastWinner[]>([]);
+  const [pastCelebrities, setPastCelebrities] = useState<PastCelebrity[]>([]);
+
+  const setMetaprompt = useCallback(
+    (newPrompt: Metaprompt | string | undefined) => {
+      setMetapromptInternal((oldPrompt: Metaprompt | string | undefined) => {
+        if (typeof oldPrompt === "object") {
+          setPastCelebrities((oldCelebs) => {
+            const newPastCelebs = [
+              ...oldCelebs.slice(0, -1),
+              {
+                celebrityName: oldPrompt.celebrity,
+                celebrityDecription: oldPrompt.metaprompt,
+              },
+            ];
+            return newPastCelebs
+          });
+        }
+        return newPrompt;
+      });
+    },
+    []
+  );
 
   useEffect(() => {
     const canceled = { current: false };
@@ -177,9 +200,16 @@ const useStateFromDatabase = (
           return;
         }
         setPastWinners(pastWinners);
+        setPastCelebrities(
+          pastWinners.map(({ celebrityName, celebrityDecription }) => ({
+            celebrityName,
+            celebrityDecription,
+          }))
+        );
       } catch (error) {
         console.error("getting past winners error:", error);
         setPastWinners([]);
+        setPastCelebrities([]);
       }
     })();
     return () => {
@@ -220,8 +250,6 @@ const useStateFromDatabase = (
     if (gameId === undefined) {
       return;
     }
-    // TODO: reconstruct the winner data and add it manually here
-    
     await restartGameInternal(gameId);
   }, [gameId]);
 
@@ -309,7 +337,7 @@ const useStateFromDatabase = (
       setImages(undefined);
       setJudgements(undefined);
     };
-  }, [gameId]);
+  }, [gameId, setMetaprompt]);
 
   if (!gameId) {
     return undefined;
@@ -347,6 +375,7 @@ const useStateFromDatabase = (
       gameId,
       admin: started.admin,
       pastWinners,
+      pastCelebrities,
     };
     if (completed && winner !== undefined) {
       const winnerPlayer = started.players.find(
@@ -417,6 +446,7 @@ const useStateFromDatabase = (
       gameId,
       startGame,
       pastWinners,
+      pastCelebrities,
     },
   };
 };

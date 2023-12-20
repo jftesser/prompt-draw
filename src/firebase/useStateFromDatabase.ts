@@ -167,7 +167,6 @@ const useStateFromDatabase = (
     undefined
   );
   const [pastWinners, setPastWinners] = useState<PastWinner[]>([]);
-  const [restartCount, setRestartCount] = useState<number>(0);
 
   useEffect(() => {
     const canceled = { current: false };
@@ -221,9 +220,10 @@ const useStateFromDatabase = (
     if (gameId === undefined) {
       return;
     }
-    setRestartCount(restartCount + 1);
+    // TODO: reconstruct the winner data and add it manually here
+    
     await restartGameInternal(gameId);
-  }, [gameId, restartCount]);
+  }, [gameId]);
 
   useEffect(() => {
     if (!gameId) {

@@ -22,7 +22,7 @@ const Intro: FC<{ state: IntroState }> = ({ state }) => {
     return () => {
       canceled.current = true;
     };
-  }, []);
+  }, [state.pastWinners]);
 
   return <Flex direction="column" align="center">
     <div>

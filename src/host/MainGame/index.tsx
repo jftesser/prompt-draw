@@ -128,7 +128,8 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     judgements,
     metaprompt,
     players,
-    prompts
+    prompts,
+    pastWinners
   ]);
 
   // Choose winner when appropriate
@@ -176,6 +177,7 @@ const MainGame: FC<{ state: MainGameState }> = ({ state }) => {
     players,
     prompts,
     winner,
+    pastWinners
   ]);
 
   const nextJudgement = useMemo(() => {
